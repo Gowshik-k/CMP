@@ -8,23 +8,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const authRoutes = require('./routes/authRoutes');
+
 app.use(cors());
 app.use(express.json());
+
+// Route Middlewares
+app.use('/api/user', authRoutes);
 
 // Basic health check route
 app.get('/api/status', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date() });
 });
 
-// Placeholder for MongoDB connection
-/*
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('Could not connect to MongoDB', err));
-*/
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB', err));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
