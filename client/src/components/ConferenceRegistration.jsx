@@ -1,3 +1,6 @@
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Calendar, Users, CheckCircle, Loader2 } from 'lucide-react';
+
 const ConferenceRegistration = () => {
     const [conferences, setConferences] = useState([]);
     const [loading, setLoading] = useState(true);

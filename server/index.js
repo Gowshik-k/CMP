@@ -23,11 +23,6 @@ app.get('/api/status', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date() });
 });
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Could not connect to MongoDB', err));
-
 // Mock Data
 const conferences = [
   {
@@ -113,7 +108,6 @@ app.get('/api/attendee/conferences', (req, res) => {
 
 app.post('/api/attendee/register', (req, res) => {
   const { conferenceId } = req.body;
-  // In a real app, we'd save this to a database
   res.status(201).json({ message: 'Registration successful', conferenceId });
 });
 
@@ -124,6 +118,19 @@ app.get('/api/attendee/schedules', (req, res) => {
 app.get('/api/attendee/certificates', (req, res) => {
   res.json(certificates);
 });
+
+app.get('/api/attendee/stats', (req, res) => {
+  res.json({
+    registeredConferences: 3,
+    upcomingSessions: 12,
+    certificatesEarned: 5
+  });
+});
+
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB', err));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
