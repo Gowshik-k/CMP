@@ -27,56 +27,9 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const userString = localStorage.getItem('user');
-  const user = userString ? JSON.parse(userString) : null;
-
   return (
     <>
-      {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
-              U
-            </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-              UniversityConf
-            </span>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-text-secondary hover:text-primary font-medium transition-colors">Home</a>
-            <a href="#conferences" className="text-text-secondary hover:text-primary font-medium transition-colors">Conferences</a>
-            <a href="#about" onClick={(e) => { e.preventDefault(); const element = document.getElementById('about'); if(element) { element.scrollIntoView({ behavior: 'smooth' }); } }} className="text-text-secondary hover:text-primary font-medium transition-colors">About Us</a>
-            {user?.role === 'Admin' && (
-              <Link to="/admin" className="text-primary font-bold hover:text-secondary transition-colors">Dashboard</Link>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            {!user ? (
-              <>
-                <Link to="/login" className="hidden md:block text-primary font-semibold hover:text-secondary transition-colors">
-                  Log In
-                </Link>
-                <Link to="/register" className="btn btn-primary py-2 px-6 text-sm">
-                  Register Now
-                </Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-zinc-600">Hi, {user.username}</span>
-                <button 
-                  onClick={() => { localStorage.clear(); window.location.reload(); }}
-                  className="text-xs font-bold text-zinc-400 hover:text-red-500 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      {/* Hero Section */}
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-20 overflow-hidden">

@@ -12,7 +12,7 @@ const AdminDashboard = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('auth-token');
-                const res = await axios.get('http://localhost:5000/api/admin/stats', {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/stats`, {
                     headers: { 'auth-token': token }
                 });
                 setStats(res.data);
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <div className="flex h-screen bg-[#f8fafc]">
+        <div className="flex h-screen bg-[#f8fafc] pt-16">
             {/* Sidebar */}
             <aside className="w-64 bg-zinc-900 text-white flex flex-col shadow-xl">
                 <div className="p-8">

@@ -11,7 +11,7 @@ const UserManagement = () => {
         const fetchUsers = async () => {
             try {
                 const token = localStorage.getItem('auth-token');
-                const res = await axios.get('http://localhost:5000/api/admin/users', {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/users`, {
                     headers: { 'auth-token': token }
                 });
                 setUsers(res.data);
@@ -27,7 +27,7 @@ const UserManagement = () => {
     const handleRoleUpdate = async (userId, newRole) => {
         try {
             const token = localStorage.getItem('auth-token');
-            const res = await axios.patch(`http://localhost:5000/api/admin/users/${userId}/role`, 
+            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/admin/users/${userId}/role`, 
                 { role: newRole },
                 { headers: { 'auth-token': token } }
             );
@@ -41,7 +41,7 @@ const UserManagement = () => {
         if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
             const token = localStorage.getItem('auth-token');
-            await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/admin/users/${userId}`, {
                 headers: { 'auth-token': token }
             });
             setUsers(users.filter(u => u._id !== userId));

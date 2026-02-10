@@ -5,14 +5,21 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import Navbar from './components/Navbar';
 
 function App() {
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   return (
     <Router>
       <div className="min-h-screen font-sans text-text-primary bg-bg-secondary">
+        <Navbar user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
           
           {/* Admin Routes */}
