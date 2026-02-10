@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Navbar from './components/Navbar';
+import Verify from './pages/Verify';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify" element={<Verify />} />
           
           {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>

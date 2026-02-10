@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,12 +23,24 @@ const Login = ({ setUser }) => {
         navigate('/');
       }
     } catch (err) {
+      if (err.response?.status === 401 && err.response?.data?.requiresVerification) {
+        // Redirect to verify if account is unverified, passing which ones are verified
+        navigate('/verify', { 
+          state: { 
+            userId: err.response.data.userId, 
+            email,
+            isEmailVerified: err.response.data.isEmailVerified,
+            isPhoneVerified: err.response.data.isPhoneVerified
+          } 
+        });
+        return;
+      }
       setError(err.response?.data || 'An error occurred');
     }
   };
 
   return (
-    <div className="flex h-screen w-full bg-white overflow-hidden">
+    <div className="flex h-screen w-full bg-white overflow-hidden pt-16">
       {/* Left Panel - Professional/Dark */}
       <div className="hidden lg:flex w-2/5 flex-col justify-between bg-zinc-900 p-12 text-white relative overflow-hidden">
         {/* Abstract Architectural Lines */}
@@ -71,43 +82,45 @@ const Login = ({ setUser }) => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="group">
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Email Address</label>
-              <input
-                type="email"
-                className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-zinc-400"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="name@university.edu"
-              />
-            </div>
-
-            <div className="group">
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-zinc-700">Password</label>
-                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">Forgot Password?</a>
+          <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="group">
+                <label className="block text-sm font-medium text-zinc-700 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-zinc-400"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="name@university.edu"
+                />
               </div>
-              <input
-                type="password"
-                className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-zinc-400"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-              />
-            </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all uppercase tracking-wider"
-              >
-                Sign In
-              </button>
-            </div>
-          </form>
+              <div className="group">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-zinc-700">Password</label>
+                  <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">Forgot Password?</a>
+                </div>
+                <input
+                  type="password"
+                  className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-zinc-400"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all uppercase tracking-wider"
+                >
+                  Sign In
+                </button>
+              </div>
+            </form>
+          </div>
 
           <p className="mt-8 text-center text-sm text-zinc-500">
             Don't have an account?{' '}
@@ -120,5 +133,4 @@ const Login = ({ setUser }) => {
     </div>
   );
 };
-
 export default Login;

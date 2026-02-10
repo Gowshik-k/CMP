@@ -13,6 +13,7 @@ const UserManagement = () => {
         username: '',
         email: '',
         password: '',
+        phoneNumber: '',
         role: 'Attendee'
     });
     const [formError, setFormError] = useState('');
@@ -45,8 +46,11 @@ const UserManagement = () => {
                 { headers: { 'auth-token': token } }
             );
             setUsers(users.map(u => u._id === userId ? res.data : u));
+            // Optimization: Minimal feedback without alert
+            console.log(`Role updated for user ${userId} to ${newRole}`);
         } catch (err) {
-            alert('Failed to update role');
+            console.error('Role update failed:', err);
+            setFormError('Failed to update user role. Please try again.');
         }
     };
 
@@ -72,7 +76,7 @@ const UserManagement = () => {
                 headers: { 'auth-token': token }
             });
             setShowAddModal(false);
-            setNewUser({ username: '', email: '', password: '', role: 'Attendee' });
+            setNewUser({ username: '', email: '', password: '', phoneNumber: '', role: 'Attendee' });
             fetchUsers();
         } catch (err) {
             setFormError(err.response?.data?.message || 'Failed to add user');
@@ -250,6 +254,18 @@ const UserManagement = () => {
                                     placeholder="••••••••"
                                     value={newUser.password}
                                     onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Phone Number</label>
+                                <input 
+                                    type="tel"
+                                    required
+                                    className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-zinc-400"
+                                    placeholder="+1 234 567 890"
+                                    value={newUser.phoneNumber}
+                                    onChange={(e) => setNewUser({...newUser, phoneNumber: e.target.value})}
                                 />
                             </div>
 

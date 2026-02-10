@@ -26,6 +26,26 @@ const userSchema = new mongoose.Schema({
         enum: ['Attendee', 'Author', 'Reviewer', 'Chair', 'Admin'],
         default: 'Attendee'
     },
+    phoneNumber: {
+        type: String,
+        required: true
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    isPhoneVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailCode: {
+        type: String,
+        default: ''
+    },
+    phoneCode: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now
