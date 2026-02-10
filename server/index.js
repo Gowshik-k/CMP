@@ -9,12 +9,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use(cors());
 app.use(express.json());
 
 // Route Middlewares
 app.use('/api/user', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Basic health check route
 app.get('/api/status', (req, res) => {

@@ -27,6 +27,9 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  const userString = localStorage.getItem('user');
+  const user = userString ? JSON.parse(userString) : null;
+
   return (
     <>
       {/* Navigation Bar */}
@@ -45,21 +48,38 @@ function Home() {
             <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-text-secondary hover:text-primary font-medium transition-colors">Home</a>
             <a href="#conferences" className="text-text-secondary hover:text-primary font-medium transition-colors">Conferences</a>
             <a href="#about" onClick={(e) => { e.preventDefault(); const element = document.getElementById('about'); if(element) { element.scrollIntoView({ behavior: 'smooth' }); } }} className="text-text-secondary hover:text-primary font-medium transition-colors">About Us</a>
+            {user?.role === 'Admin' && (
+              <Link to="/admin" className="text-primary font-bold hover:text-secondary transition-colors">Dashboard</Link>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
-            <Link to="/login" className="hidden md:block text-primary font-semibold hover:text-secondary transition-colors">
-              Log In
-            </Link>
-            <Link to="/register" className="btn btn-primary py-2 px-6 text-sm">
-              Register Now
-            </Link>
+            {!user ? (
+              <>
+                <Link to="/login" className="hidden md:block text-primary font-semibold hover:text-secondary transition-colors">
+                  Log In
+                </Link>
+                <Link to="/register" className="btn btn-primary py-2 px-6 text-sm">
+                  Register Now
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-zinc-600">Hi, {user.username}</span>
+                <button 
+                  onClick={() => { localStorage.clear(); window.location.reload(); }}
+                  className="text-xs font-bold text-zinc-400 hover:text-red-500 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+      <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-20 overflow-hidden">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-accent/10 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl opacity-40 pointer-events-none"></div>
 
@@ -68,16 +88,16 @@ function Home() {
             <div className="inline-block px-4 py-2 mb-6 rounded-full bg-blue-50 text-primary font-semibold text-sm tracking-wide border border-blue-100 mx-auto">
               🎓 Official Conference Portal
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold leading-tight mb-8 text-text-primary">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 text-text-primary">
               Advancing Knowledge at <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Grand University</span>
             </h1>
-            <p className="text-lg md:text-xl text-text-secondary mb-12 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-text-secondary mb-8 leading-relaxed max-w-2xl mx-auto">
               Join leading researchers, scholars, and students in our annual academic gatherings. 
               Explore upcoming conferences, submit your papers, and be part of the innovation.
             </p>
             
             {/* Countdown Timer */}
-            <div className="mb-12">
+            <div className="mb-8">
                 <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Next Major Event Starts In</p>
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
                     <TimeBox label="Days" value={timeLeft.days} />
@@ -264,9 +284,9 @@ function Home() {
 
 function TimeBox({ label, value }) {
   return (
-     <div className="flex flex-col items-center p-4 bg-white rounded-xl shadow-lg border border-gray-100 min-w-[90px] md:min-w-[120px] backdrop-blur-sm bg-white/90">
-        <span className="text-3xl md:text-5xl font-bold text-primary mb-1 font-mono tracking-tighter">{String(value).padStart(2, '0')}</span>
-        <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">{label}</span>
+     <div className="flex flex-col items-center p-3 md:p-4 bg-white rounded-xl shadow-lg border border-gray-100 min-w-[70px] md:min-w-[100px] backdrop-blur-sm bg-white/90">
+        <span className="text-2xl md:text-4xl font-bold text-primary mb-1 font-mono tracking-tighter">{String(value).padStart(2, '0')}</span>
+        <span className="text-[10px] md:text-xs text-gray-500 uppercase font-bold tracking-widest">{label}</span>
      </div>
   )
 }
