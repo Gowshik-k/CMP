@@ -2,7 +2,11 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
+<<<<<<< HEAD
 const Login = () => {
+=======
+const Login = ({ setUser }) => {
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -11,10 +15,25 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+<<<<<<< HEAD
       const res = await axios.post('http://localhost:5000/api/user/login', { email, password });
       localStorage.setItem('auth-token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       navigate('/');
+=======
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, { email, password });
+      localStorage.setItem('auth-token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      
+      // Update global user state
+      setUser(res.data.user);
+      
+      if (res.data.user.role === 'Admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
     } catch (err) {
       setError(err.response?.data || 'An error occurred');
     }

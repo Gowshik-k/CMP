@@ -23,6 +23,7 @@ app.get('/api/status', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date() });
 });
 
+<<<<<<< HEAD
 // Mock Data
 const conferences = [
   {
@@ -127,6 +128,8 @@ app.get('/api/attendee/stats', (req, res) => {
   });
 });
 
+=======
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))

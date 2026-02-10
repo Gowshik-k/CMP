@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
@@ -10,16 +11,30 @@ import Certificates from './components/Certificates';
 import Overview from './components/Overview';
 
 // Auth & Admin Components
+=======
+import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
+<<<<<<< HEAD
+=======
+import Navbar from './components/Navbar';
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
 
 function App() {
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   return (
     <Router>
       <div className="min-h-screen font-sans text-text-primary bg-bg-secondary">
+<<<<<<< HEAD
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -36,10 +51,19 @@ function App() {
             </Route>
           </Route>
 
+=======
+        <Navbar user={user} setUser={setUser} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login setUser={setUser} />} />
+          <Route path="/register" element={<Register />} />
+          
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
           {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
             <Route path="/admin" element={<AdminDashboard />} />
           </Route>
+<<<<<<< HEAD
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" />} />
@@ -47,6 +71,12 @@ function App() {
       </div>
     </Router>
   );
+=======
+        </Routes>
+      </div>
+    </Router>
+  )
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
 }
 
 export default App;

@@ -20,6 +20,7 @@ yarn-error.log*
 
 # System Files
 .DS_Store
+<<<<<<< HEAD
 Thumbs.db
 .vscode/
 .idea/
@@ -28,3 +29,6 @@ Thumbs.db
 .npm
 .eslintcache
 .stylelintcache
+=======
+.vscode/
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629

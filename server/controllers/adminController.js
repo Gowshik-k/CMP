@@ -1,5 +1,35 @@
 const User = require('../models/User');
 
+<<<<<<< HEAD
+=======
+// Create new user
+exports.createUser = async (req, res) => {
+    try {
+        const { username, email, password, role } = req.body;
+
+        // Check if user already exists
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: 'User with this email already exists' });
+        }
+
+        const newUser = new User({
+            username,
+            email,
+            password, // Password hashing is handled by User model pre-save hook
+            role
+        });
+
+        await newUser.save();
+
+        const userResponse = await User.findById(newUser._id).select('-password');
+        res.status(201).json(userResponse);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+>>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
 // Get all users
 exports.getAllUsers = async (req, res) => {
     try {
