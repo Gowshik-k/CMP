@@ -8,6 +8,7 @@ router.use(authMiddleware);
 router.use(roleMiddleware('Admin'));
 
 router.get('/users', adminController.getAllUsers);
+router.post('/users', adminController.createUser);
 router.patch('/users/:id/role', adminController.updateUserRole);
 router.delete('/users/:id', adminController.deleteUser);
 router.get('/stats', adminController.getStats);
