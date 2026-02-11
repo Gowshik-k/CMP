@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Users, FileText, Calendar, Settings, LogOut, ChevronRight, TrendingUp, Shield } from 'lucide-react';
+import { adminAPI } from '../../api';
 import UserManagement from './UserManagement';
 
 const AdminDashboard = () => {
@@ -11,11 +11,8 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const token = localStorage.getItem('auth-token');
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/stats`, {
-                    headers: { 'auth-token': token }
-                });
-                setStats(res.data);
+                const res = await adminAPI.getStats();
+                setStats(res.data.data);
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching stats:', err);

@@ -6,8 +6,11 @@ dotenv.config();
 
 const listUsers = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        const users = await User.find({}, 'username email role');
+        await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000,
+            family: 4
+        });
+        const users = await User.find({}, 'username email role isEmailVerified isPhoneVerified');
         console.log('--- Current Users in Database ---');
         console.log(JSON.stringify(users, null, 2));
         console.log('---------------------------------');

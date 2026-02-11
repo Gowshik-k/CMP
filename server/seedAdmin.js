@@ -6,7 +6,10 @@ dotenv.config();
 
 const seedAdmin = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000,
+            family: 4
+        });
         console.log('Connected to MongoDB');
 
         const adminEmail = process.env.ADMIN_EMAIL || 'admin@university.edu';

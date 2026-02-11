@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { UserCog, Trash2, ShieldCheck, Mail, Calendar, Search, UserPlus, X, ChevronDown, Check, Shield, User as UserIcon, Award, Briefcase } from 'lucide-react';
+import { adminAPI } from '../../api';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -22,11 +22,8 @@ const UserManagement = () => {
 
     const fetchUsers = async () => {
         try {
-            const token = localStorage.getItem('auth-token');
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/users`, {
-                headers: { 'auth-token': token }
-            });
-            setUsers(res.data || []);
+            const res = await adminAPI.getAllUsers();
+            setUsers(res.data.data || []);
             setLoading(false);
         } catch (err) {
             console.error('Error fetching users:', err);
@@ -40,13 +37,8 @@ const UserManagement = () => {
 
     const handleRoleUpdate = async (userId, newRole) => {
         try {
-            const token = localStorage.getItem('auth-token');
-            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/admin/users/${userId}/role`, 
-                { role: newRole },
-                { headers: { 'auth-token': token } }
-            );
-            setUsers(users.map(u => u._id === userId ? res.data : u));
-            // Optimization: Minimal feedback without alert
+            const res = await adminAPI.updateUserRole(userId, newRole);
+            setUsers(users.map(u => u._id === userId ? res.data.data : u));
             console.log(`Role updated for user ${userId} to ${newRole}`);
         } catch (err) {
             console.error('Role update failed:', err);
@@ -57,10 +49,7 @@ const UserManagement = () => {
     const handleDeleteUser = async (userId) => {
         if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
-            const token = localStorage.getItem('auth-token');
-            await axios.delete(`${import.meta.env.VITE_API_URL}/admin/users/${userId}`, {
-                headers: { 'auth-token': token }
-            });
+            await adminAPI.deleteUser(userId);
             setUsers(users.filter(u => u._id !== userId));
         } catch (err) {
             alert('Failed to delete user');
@@ -71,10 +60,7 @@ const UserManagement = () => {
         e.preventDefault();
         setFormError('');
         try {
-            const token = localStorage.getItem('auth-token');
-            await axios.post(`${import.meta.env.VITE_API_URL}/admin/users`, newUser, {
-                headers: { 'auth-token': token }
-            });
+            await adminAPI.createUser(newUser);
             setShowAddModal(false);
             setNewUser({ username: '', email: '', password: '', phoneNumber: '', role: 'Attendee' });
             fetchUsers();

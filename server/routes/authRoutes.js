@@ -55,6 +55,9 @@ router.post('/register', async (req, res) => {
         });
     } catch (err) {
         console.error('Registration error:', err);
+        if (err.name === 'MongooseServerSelectionError' || err.name === 'MongoNetworkError') {
+            return res.status(503).send('Database connection error. Please ensure your IP is whitelisted in MongoDB Atlas.');
+        }
         res.status(500).send('Internal server error during registration');
     }
 });
@@ -145,6 +148,9 @@ router.post('/login', async (req, res) => {
         });
     } catch (err) {
         console.error('Login error:', err);
+        if (err.name === 'MongooseServerSelectionError' || err.name === 'MongoNetworkError') {
+            return res.status(503).send('Database connection error. Please ensure your IP is whitelisted in MongoDB Atlas.');
+        }
         res.status(500).send('Internal server error during login.');
     }
 });
