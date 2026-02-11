@@ -1,7 +1,5 @@
 const User = require('../models/User');
 
-<<<<<<< HEAD
-=======
 // Create new user
 exports.createUser = async (req, res) => {
     try {
@@ -28,8 +26,6 @@ exports.createUser = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
->>>>>>> 724ce70c19f3421f7fead5903106498fa868c629
 // Get all users
 exports.getAllUsers = async (req, res) => {
     try {
