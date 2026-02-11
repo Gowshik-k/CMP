@@ -112,6 +112,7 @@ const AdminDashboard = () => {
                                 change="+12%" 
                                 icon={Users}
                                 color="blue"
+                                onClick={() => setActiveTab('users')}
                             />
                             <StatCard 
                                 label="Conferences" 
@@ -119,6 +120,7 @@ const AdminDashboard = () => {
                                 change="+2" 
                                 icon={Calendar}
                                 color="emerald"
+                                onClick={() => setActiveTab('conferences')}
                             />
                             <StatCard 
                                 label="Submissions" 
@@ -126,6 +128,7 @@ const AdminDashboard = () => {
                                 change="+24" 
                                 icon={FileText}
                                 color="amber"
+                                onClick={() => setActiveTab('submissions')}
                             />
                         </div>
 
@@ -186,7 +189,7 @@ const AdminDashboard = () => {
     );
 };
 
-const StatCard = ({ label, value, change, icon: Icon, color }) => {
+const StatCard = ({ label, value, change, icon: Icon, color, onClick }) => {
     const colorClasses = {
         blue: 'bg-blue-50 text-blue-600',
         emerald: 'bg-emerald-50 text-emerald-600',
@@ -194,7 +197,10 @@ const StatCard = ({ label, value, change, icon: Icon, color }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow transition-all group h-full flex flex-col justify-between">
+        <div 
+            onClick={onClick}
+            className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow transition-all group h-full flex flex-col justify-between cursor-pointer"
+        >
             <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-2xl ${colorClasses[color]} group-hover:scale-110 transition-transform`}>
                     <Icon className="w-5 h-5" />
