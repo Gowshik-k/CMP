@@ -46,10 +46,13 @@ const Navbar = ({ user, setUser }) => {
                             <a href="/#about" className="text-zinc-600 hover:text-blue-600 font-medium transition-colors">About Us</a>
                         </>
                     )}
-                    {user?.role === 'Admin' && (
+                    {user && (
                         <Link 
-                            to="/admin" 
-                            className={`font-bold transition-colors ${isActive('/admin') ? 'text-blue-600' : 'text-zinc-500 hover:text-blue-600'}`}
+                            to={user.role === 'Admin' ? '/admin' : '/dashboard'}
+                            className={`font-bold transition-colors ${
+                                (user.role === 'Admin' ? isActive('/admin') : isActive('/dashboard')) 
+                                ? 'text-blue-600' : 'text-zinc-500 hover:text-blue-600'
+                            }`}
                         >
                             Dashboard
                         </Link>

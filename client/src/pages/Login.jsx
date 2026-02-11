@@ -25,7 +25,7 @@ const Login = ({ setUser }) => {
       if (res.data.user.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       if (err.response?.status === 401 && err.response?.data?.requiresVerification) {

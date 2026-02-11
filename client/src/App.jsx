@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import UserDashboard from './pages/user/UserDashboard';
 import Navbar from './components/Navbar';
 import Verify from './pages/Verify';
 
@@ -27,6 +28,11 @@ function App() {
           {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
             <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+
+          {/* User Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['Attendee', 'Author', 'Reviewer', 'Chair']} />}>
+            <Route path="/dashboard" element={<UserDashboard />} />
           </Route>
         </Routes>
       </div>

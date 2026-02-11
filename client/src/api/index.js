@@ -79,4 +79,18 @@ export const adminAPI = {
         apiClient.delete(`/admin/conferences/${id}`)
 };
 
+export const participantAPI = {
+    getDashboardData: () =>
+        apiClient.get('/participant/dashboard'),
+
+    getConferences: () =>
+        apiClient.get('/participant/conferences'),
+
+    register: (conferenceId) =>
+        apiClient.post('/participant/register', { conferenceId }),
+
+    submitPaper: (data) =>
+        apiClient.post('/participant/submit', data)
+};
+
 export default apiClient;
