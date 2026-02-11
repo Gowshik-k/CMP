@@ -23,7 +23,10 @@ const seedAdmin = async () => {
             username: adminUsername,
             email: adminEmail,
             password: adminPassword, // Will be hashed by pre-save hook
-            role: 'Admin'
+            role: 'Admin',
+            phoneNumber: '+1000000000',
+            isEmailVerified: true,
+            isPhoneVerified: true
         });
 
         await adminUser.save();

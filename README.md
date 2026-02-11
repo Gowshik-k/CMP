@@ -1,67 +1,71 @@
-# CMP - University Conference Management System
+# University Conference Management Portal (CMP)
 
-A modern MERN stack application for managing university conferences.
+A high-performance, modern MERN stack application designed for university conferences. Features a premium UI, role-based access control, and dual-layer security verification.
 
-## Project Structure
+## 🚀 Key Features
 
-```
+- **Premium UI**: Modern, responsive design with gradient animations and glassmorphism.
+- **Dual Verification**: Mandatory Email + Mobile verification for all new accounts.
+- **Secure Authentication**: JWT-based session management.
+- **Admin Dashboard**: Comprehensive control for chairs and system admins.
+- **Auto-Verification**: Real-time code validation (no click required).
+- **Auto-Documentation**: Built with collaboration in mind.
+
+## 📁 Project Structure
+
+```text
 CMP/
-├── server/          # Backend (Node.js + Express)
-│   ├── index.js     # Server entry point
-│   ├── package.json
-│   └── .env         # Environment variables
-│
-└── client/          # Frontend (React + Vite)
+├── server/             # Backend (Node.js + Express + MongoDB)
+│   ├── models/         # Database Schemas
+│   ├── routes/         # API Endpoints
+│   ├── utils/          # Helpers (Email, etc.)
+│   └── seedAdmin.js    # Script to setup initial admin
+└── client/             # Frontend (React + Vite + Tailwind)
     ├── src/
-    │   ├── App.jsx
-    │   ├── App.css
-    │   ├── main.jsx
-    │   └── index.css
-    ├── index.html
-    ├── vite.config.js
-    └── package.json
+    │   ├── pages/      # Route Components (Login, Register, Dashboard)
+    │   └── components/ # Reusable UI Elements
 ```
 
-## Getting Started
+## 🛠️ Installation & Setup
 
-### Server Setup
+### 1. Prerequisites
+- Node.js (v16+)
+- MongoDB (Local or Atlas)
 
+### 2. Backend Setup
 ```bash
 cd server
 npm install
-npm start        # Production
-npm run dev      # Development with nodemon
+cp .env.example .env  # Configure your MONGODB_URI and JWT_SECRET
+npm run dev
 ```
 
-Server runs on: `http://localhost:5000`
+**Seed Admin Account:**
+After setting up `.env`, run:
+```bash
+npm run admin
+```
 
-### Client Setup
-
+### 3. Frontend Setup
 ```bash
 cd client
 npm install
-npm run dev      # Development server
+cp .env.example .env  # Configure VITE_API_URL
+npm run dev
 ```
 
-Client runs on: `http://localhost:3000`
+## 📧 Verification System (Development)
+In development mode, if SMTP credentials are not provided:
+- **Email Code**: Logged to the **Server Terminal**.
+- **Mobile Code**: Shown as a browser **Alert** on signup and logged to console.
 
-## Features
+---
 
-- ✨ Modern, premium UI with gradient animations
-- 🎯 Responsive design for all devices
-- 🔒 CORS-enabled backend
-- 📊 MongoDB ready (connection commented out)
-- ⚡ Vite for fast development
-- 🎨 Glassmorphism and modern CSS effects
+## 👨‍💻 Contributing
+1. Create a feature branch: `git checkout -b feature/cool-new-feature`
+2. Commit changes: `git commit -m 'Add some feature'`
+3. Push to branch: `git push origin feature/cool-new-feature`
+4. Open a Pull Request.
 
-## Environment Variables
-
-Server `.env`:
-```
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/conference_db
-```
-
-## API Endpoints
-
-- `GET /api/status` - Health check endpoint
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
