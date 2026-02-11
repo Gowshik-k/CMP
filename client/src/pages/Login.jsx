@@ -41,7 +41,8 @@ const Login = ({ setUser }) => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data || 'An error occurred');
+      const msg = err.response?.data?.message || err.response?.data || 'An error occurred';
+      setError(typeof msg === 'object' ? JSON.stringify(msg) : msg);
     }
   };
 

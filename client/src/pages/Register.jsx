@@ -18,7 +18,8 @@ const Register = () => {
       await axios.post(`${import.meta.env.VITE_API_URL}/user/register`, { username, email, password, role });
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data || 'An error occurred');
+      const msg = err.response?.data?.message || err.response?.data || 'An error occurred';
+      setError(typeof msg === 'object' ? JSON.stringify(msg) : msg);
     }
   };
 

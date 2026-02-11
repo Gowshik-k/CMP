@@ -115,7 +115,7 @@ function Home({ user }) {
                   <span className="px-3 py-1 rounded-md bg-white/10 text-white text-sm hover:bg-white/20 transition cursor-default">Ethics</span>
                   <span className="px-3 py-1 rounded-md bg-white/10 text-white text-sm hover:bg-white/20 transition cursor-default">Biotech</span>
                 </div>
-                <Link to="/dashboard/login" className="w-full py-4 bg-white text-primary font-bold rounded-2xl hover:bg-blue-50 transition shadow-xl flex items-center justify-center">
+                <Link to="/register" className="w-full py-4 bg-white text-primary font-bold rounded-2xl hover:bg-blue-50 transition shadow-xl flex items-center justify-center">
                   Register Now
                 </Link>
               </div>

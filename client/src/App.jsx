@@ -20,7 +20,10 @@ import Navbar from './components/Navbar';
 // Wrapper component to handle conditional Navbar rendering
 const AppContent = ({ user, setUser }) => {
   const location = useLocation();
-  const isDashboardRoute = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
+  const isDashboardRoute = location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname === '/login' ||
+    location.pathname === '/register';
 
   return (
     <div className={`min-h-screen font-sans ${!isDashboardRoute ? 'text-text-primary bg-bg-secondary' : 'bg-[#FDFDFD]'}`}>
@@ -33,7 +36,7 @@ const AppContent = ({ user, setUser }) => {
         <Route path="/register" element={<Register />} />
 
         {/* Attendee Protected Dashboard */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute user={user} />}>
           <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />}>
             <Route index element={<Overview />} />
             <Route path="registration" element={<ConferenceRegistration />} />
@@ -43,8 +46,8 @@ const AppContent = ({ user, setUser }) => {
         </Route>
 
         {/* Admin Protected Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
-          <Route path="/admin" element={<AdminDashboard />} />
+        <Route element={<ProtectedRoute user={user} allowedRoles={['Admin']} />}>
+          <Route path="/admin" element={<AdminDashboard user={user} />} />
         </Route>
 
         {/* Catch-all */}
