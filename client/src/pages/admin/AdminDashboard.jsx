@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, FileText, Calendar, Settings, LogOut, ChevronRight, TrendingUp, Shield } from 'lucide-react';
 import { adminAPI } from '../../api';
 import UserManagement from './UserManagement';
+import ConferenceManagement from './ConferenceManagement';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -179,7 +180,9 @@ const AdminDashboard = () => {
 
                 {activeTab === 'users' && <UserManagement key={refreshKey} />}
                 
-                {['conferences', 'submissions', 'settings'].includes(activeTab) && (
+                {activeTab === 'conferences' && <ConferenceManagement key={refreshKey} />}
+
+                {['submissions', 'settings'].includes(activeTab) && (
                    <div className="flex flex-col items-center justify-center h-64 bg-white rounded-3xl border border-zinc-200 border-dashed">
                        <p className="text-zinc-400 font-medium">This module is coming soon...</p>
                    </div>
