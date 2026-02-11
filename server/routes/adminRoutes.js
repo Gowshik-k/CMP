@@ -13,4 +13,11 @@ router.patch('/users/:id/role', adminController.updateUserRole);
 router.delete('/users/:id', adminController.deleteUser);
 router.get('/stats', adminController.getStats);
 
+// Conference Routes
+const conferenceController = require('../controllers/conferenceController');
+router.get('/conferences', conferenceController.getAllConferences);
+router.post('/conferences', conferenceController.createConference);
+router.put('/conferences/:id', conferenceController.updateConference);
+router.delete('/conferences/:id', conferenceController.deleteConference);
+
 module.exports = router;

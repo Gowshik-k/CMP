@@ -63,7 +63,20 @@ export const adminAPI = {
         apiClient.patch(`/admin/users/${userId}/role`, { role }),
 
     deleteUser: (userId) =>
-        apiClient.delete(`/admin/users/${userId}`)
+        apiClient.delete(`/admin/users/${userId}`),
+
+    // Conference API
+    getAllConferences: () =>
+        apiClient.get('/admin/conferences'),
+
+    createConference: (data) =>
+        apiClient.post('/admin/conferences', data),
+
+    updateConference: (id, data) =>
+        apiClient.put(`/admin/conferences/${id}`, data),
+
+    deleteConference: (id) =>
+        apiClient.delete(`/admin/conferences/${id}`)
 };
 
 export default apiClient;
