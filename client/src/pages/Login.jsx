@@ -10,6 +10,23 @@ const Login = ({ setUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Dummy credential check
+    if (email === 'attendee@gmail.com' && password === 'password123') {
+      const dummyUser = {
+        name: 'Dummy Attendee',
+        username: 'Dummy Attendee',
+        email: 'attendee@gmail.com',
+        role: 'Attendee'
+      };
+
+      localStorage.setItem('auth-token', 'dummy-token-123');
+      localStorage.setItem('user', JSON.stringify(dummyUser));
+      setUser(dummyUser);
+      navigate('/dashboard');
+      return;
+    }
+
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, { email, password });
       localStorage.setItem('auth-token', res.data.token);
@@ -21,10 +38,10 @@ const Login = ({ setUser }) => {
       if (res.data.user.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data || 'An error occurred');
+      setError(err.response?.data?.message || err.response?.data || 'An error occurred');
     }
   };
 

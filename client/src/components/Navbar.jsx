@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = ({ user, setUser }) => {
     const location = useLocation();
-    
+
     const handleLogout = () => {
         localStorage.clear();
         setUser(null);
@@ -31,10 +31,10 @@ const Navbar = ({ user, setUser }) => {
                         </span>
                     </Link>
                 </div>
-                
+
                 <div className="hidden md:flex items-center gap-8">
-                    <Link 
-                        to="/" 
+                    <Link
+                        to="/"
                         onClick={handleHomeClick}
                         className={`font-medium transition-colors ${isActive('/') ? 'text-blue-600' : 'text-zinc-600 hover:text-blue-600'}`}
                     >
@@ -46,9 +46,17 @@ const Navbar = ({ user, setUser }) => {
                             <a href="/#about" className="text-zinc-600 hover:text-blue-600 font-medium transition-colors">About Us</a>
                         </>
                     )}
+                    {user?.role === 'Attendee' && (
+                        <Link
+                            to="/dashboard"
+                            className={`font-bold transition-colors ${isActive('/dashboard') ? 'text-blue-600' : 'text-zinc-500 hover:text-blue-600'}`}
+                        >
+                            Dashboard
+                        </Link>
+                    )}
                     {user?.role === 'Admin' && (
-                        <Link 
-                            to="/admin" 
+                        <Link
+                            to="/admin"
                             className={`font-bold transition-colors ${isActive('/admin') ? 'text-blue-600' : 'text-zinc-500 hover:text-blue-600'}`}
                         >
                             Dashboard
@@ -69,7 +77,7 @@ const Navbar = ({ user, setUser }) => {
                     ) : (
                         <div className="flex items-center gap-4">
                             <span className="text-sm font-medium text-zinc-600">Hi, {user.username}</span>
-                            <button 
+                            <button
                                 onClick={handleLogout}
                                 className="text-xs font-bold text-zinc-400 hover:text-red-500 transition-colors"
                             >

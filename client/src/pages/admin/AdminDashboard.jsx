@@ -49,8 +49,8 @@ const AdminDashboard = () => {
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${activeTab === item.id
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
                                     }`}
                             >
                                 <item.icon className={`w-4.5 h-4.5 ${activeTab === item.id ? 'text-white' : 'text-zinc-500 group-hover:text-blue-400'}`} />

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-function Home() {
+function Home({ user }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -58,13 +58,22 @@ function Home() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#conferences" className="btn btn-primary text-lg px-10 py-4 shadow-xl shadow-blue-500/20">
-                View Upcoming Events
-              </a>
-              <a href="#about" className="btn btn-secondary text-lg px-10 py-4 bg-white hover:bg-gray-50">
-                Learn More
-              </a>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+              {user ? (
+                <Link to={user.role === 'Admin' ? '/admin' : '/dashboard'} className="btn btn-primary text-lg px-12 py-4 shadow-2xl shadow-blue-500/30 rounded-2xl flex items-center gap-2">
+                  Go to Dashboard
+                  <span className="text-xl">→</span>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/register" className="btn btn-primary text-lg px-12 py-4 shadow-2xl shadow-blue-500/30 rounded-2xl">
+                    Get Started
+                  </Link>
+                  <Link to="/login" className="btn btn-secondary text-lg px-12 py-4 bg-white hover:bg-gray-50 rounded-2xl border-2 border-zinc-100">
+                    Member Login
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -106,9 +115,9 @@ function Home() {
                   <span className="px-3 py-1 rounded-md bg-white/10 text-white text-sm hover:bg-white/20 transition cursor-default">Ethics</span>
                   <span className="px-3 py-1 rounded-md bg-white/10 text-white text-sm hover:bg-white/20 transition cursor-default">Biotech</span>
                 </div>
-                <button className="w-full py-3 bg-white text-primary font-bold rounded-xl hover:bg-blue-50 transition shadow-lg">
+                <Link to="/dashboard/login" className="w-full py-4 bg-white text-primary font-bold rounded-2xl hover:bg-blue-50 transition shadow-xl flex items-center justify-center">
                   Register Now
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -260,7 +269,7 @@ function ConferenceCard({ date, title, dept, status }) {
       <div className="flex justify-between items-start mb-4">
         <span className="text-sm font-bold text-primary bg-blue-50 px-3 py-1 rounded-full">{date}</span>
         <span className={`text-xs font-semibold px-2 py-1 rounded ${status === 'Registration Open' ? 'bg-green-100 text-green-700' :
-            status === 'Call for Papers' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
+          status === 'Call for Papers' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
           }`}>
           {status}
         </span>

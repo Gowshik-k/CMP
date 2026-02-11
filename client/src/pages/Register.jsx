@@ -69,8 +69,8 @@ const Register = () => {
                   type="button"
                   onClick={() => setRole(r)}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 border ${role === r
-                      ? 'bg-zinc-900 text-white border-zinc-900 shadow-md'
-                      : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
+                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-md'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
                     }`}
                 >
                   {r}

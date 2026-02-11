@@ -262,8 +262,8 @@ const UserManagement = () => {
                                             type="button"
                                             onClick={() => setNewUser({ ...newUser, role: r })}
                                             className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all ${newUser.role === r
-                                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                                                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
+                                                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                                                : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
                                                 }`}
                                         >
                                             {r}
