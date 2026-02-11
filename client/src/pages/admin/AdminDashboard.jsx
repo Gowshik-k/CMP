@@ -7,9 +7,12 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState({ totalUsers: 0, roleDistribution: [] });
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
         const fetchStats = async () => {
+            if (activeTab !== 'overview') return;
+            
             try {
                 const res = await adminAPI.getStats();
                 setStats(res.data.data);
@@ -20,7 +23,7 @@ const AdminDashboard = () => {
             }
         };
         fetchStats();
-    }, []);
+    }, [activeTab, refreshKey]);
 
     const sidebarItems = [
         { id: 'overview', label: 'Overview', icon: TrendingUp },
@@ -29,6 +32,15 @@ const AdminDashboard = () => {
         { id: 'submissions', label: 'Submissions', icon: FileText },
         { id: 'settings', label: 'Site Settings', icon: Settings },
     ];
+
+    const handleTabClick = (tabId) => {
+        if (activeTab === tabId) {
+            // If clicking the current tab, trigger a refresh
+            setRefreshKey(prev => prev + 1);
+        } else {
+            setActiveTab(tabId);
+        }
+    };
 
     return (
         <div className="flex h-screen bg-[#f8fafc] pt-16">
@@ -44,7 +56,7 @@ const AdminDashboard = () => {
                         {sidebarItems.map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => setActiveTab(item.id)}
+                                onClick={() => handleTabClick(item.id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
                                     activeTab === item.id 
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
@@ -91,9 +103,9 @@ const AdminDashboard = () => {
                 </header>
 
                 {activeTab === 'overview' && (
-                    <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-6 animate-fade-in-up">
+                    <div className="flex-1 overflow-y-auto pr-2 -mr-2 flex flex-col gap-6 animate-fade-in-up">
                         {/* Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 flex-1 min-h-[140px]">
                             <StatCard 
                                 label="Total Users" 
                                 value={stats.totalUsers} 
@@ -118,29 +130,35 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Distribution and Logs placeholder */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-[2] min-h-[300px]">
+                            <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm h-full flex flex-col">
                                 <h3 className="text-base font-bold text-zinc-900 mb-5 flex items-center gap-2">
                                     <Shield className="w-4.5 h-4.5 text-blue-500" />
                                     Role Distribution
                                 </h3>
-                                <div className="space-y-3.5">
-                                    {stats.roleDistribution.map((role) => (
-                                        <div key={role._id} className="flex items-center gap-4">
-                                            <div className="w-20 text-xs font-medium text-zinc-600">{role._id}</div>
-                                            <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-                                                <div 
-                                                    className="h-full bg-blue-500 rounded-full transition-all duration-1000"
-                                                    style={{ width: `${(role.count / stats.totalUsers) * 100}%` }}
-                                                ></div>
+                                <div className="flex-1 flex flex-col justify-center gap-6">
+                                    {['Admin', 'Chair', 'Reviewer', 'Author', 'Attendee'].map((roleName) => {
+                                        const roleStats = stats.roleDistribution.find(r => r._id === roleName);
+                                        const count = roleStats ? roleStats.count : 0;
+                                        const percentage = stats.totalUsers > 0 ? (count / stats.totalUsers) * 100 : 0;
+                                        
+                                        return (
+                                            <div key={roleName} className="flex items-center gap-4">
+                                                <div className="w-24 text-sm font-medium text-zinc-600">{roleName}</div>
+                                                <div className="flex-1 h-2.5 bg-zinc-100 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                                                        style={{ width: `${percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <div className="w-8 text-sm font-bold text-zinc-900 text-right">{count}</div>
                                             </div>
-                                            <div className="w-6 text-xs font-bold text-zinc-900 text-right">{role.count}</div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                             
-                            <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm flex flex-col items-center justify-center text-center">
+                            <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm flex flex-col items-center justify-center text-center h-full">
                                 <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 mb-4">
                                     <TrendingUp className="w-6 h-6" />
                                 </div>
@@ -156,7 +174,7 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                {activeTab === 'users' && <UserManagement />}
+                {activeTab === 'users' && <UserManagement key={refreshKey} />}
                 
                 {['conferences', 'submissions', 'settings'].includes(activeTab) && (
                    <div className="flex flex-col items-center justify-center h-64 bg-white rounded-3xl border border-zinc-200 border-dashed">
@@ -176,7 +194,7 @@ const StatCard = ({ label, value, change, icon: Icon, color }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow transition-all group">
+        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow transition-all group h-full flex flex-col justify-between">
             <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-2xl ${colorClasses[color]} group-hover:scale-110 transition-transform`}>
                     <Icon className="w-5 h-5" />
