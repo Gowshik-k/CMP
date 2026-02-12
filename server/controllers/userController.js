@@ -1,6 +1,7 @@
 const Registration = require('../models/Registration');
 const Submission = require('../models/Submission');
 const Conference = require('../models/Conference');
+const User = require('../models/User');
 
 // Register for a conference
 exports.registerForConference = async (req, res) => {
@@ -82,6 +83,8 @@ exports.getUserDashboardData = async (req, res) => {
     try {
         const userId = req.user._id;
 
+        const user = await User.findById(userId).select('-password');
+
         const registrations = await Registration.find({ user: userId })
             .populate('conference', 'title startDate endDate location status');
 
@@ -91,6 +94,7 @@ exports.getUserDashboardData = async (req, res) => {
         res.status(200).json({
             success: true,
             data: {
+                user,
                 registrations,
                 submissions
             }
@@ -129,6 +133,39 @@ exports.getAllConferences = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching conferences',
+            error: error.message
+        });
+    }
+};
+
+// Update user profile
+exports.updateProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { affiliation, bio, socialLinks, phoneNumber } = req.body;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    affiliation,
+                    bio,
+                    socialLinks,
+                    phoneNumber
+                }
+            },
+            { new: true }
+        ).select('-password');
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: updatedUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile',
             error: error.message
         });
     }

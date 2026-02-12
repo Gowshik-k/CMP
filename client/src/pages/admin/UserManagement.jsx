@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { UserCog, Trash2, ShieldCheck, Mail, Calendar, Search, UserPlus, X, ChevronDown, Check, Shield, User as UserIcon, Award, Briefcase, Phone, Lock } from 'lucide-react';
 import { adminAPI } from '../../api';
 
-const UserManagement = () => {
+const UserManagement = ({ onUpdate }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,6 +39,7 @@ const UserManagement = () => {
         try {
             const res = await adminAPI.updateUserRole(userId, newRole);
             setUsers(users.map(u => u._id === userId ? res.data.data : u));
+            onUpdate?.();
             console.log(`Role updated for user ${userId} to ${newRole}`);
         } catch (err) {
             console.error('Role update failed:', err);
@@ -51,6 +52,7 @@ const UserManagement = () => {
         try {
             await adminAPI.deleteUser(userId);
             setUsers(users.filter(u => u._id !== userId));
+            onUpdate?.();
         } catch (err) {
             alert('Failed to delete user');
         }
@@ -64,6 +66,7 @@ const UserManagement = () => {
             setShowAddModal(false);
             setNewUser({ username: '', email: '', password: '', phoneNumber: '', role: 'Attendee' });
             fetchUsers();
+            onUpdate?.();
         } catch (err) {
             setFormError(err.response?.data?.message || 'Failed to add user');
         }

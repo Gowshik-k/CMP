@@ -3,10 +3,18 @@ import { Users, FileText, Calendar, Settings, LogOut, ChevronRight, TrendingUp, 
 import { adminAPI } from '../../api';
 import UserManagement from './UserManagement';
 import ConferenceManagement from './ConferenceManagement';
+import SubmissionManagement from './SubmissionManagement';
+import SiteSettings from './SiteSettings';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
-    const [stats, setStats] = useState({ totalUsers: 0, roleDistribution: [] });
+    const [stats, setStats] = useState({ 
+        totalUsers: 0, 
+        totalConferences: 0, 
+        totalSubmissions: 0, 
+        recentConferences: [],
+        roleDistribution: [] 
+    });
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -44,7 +52,7 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="flex h-screen bg-[#f8fafc] pt-16">
+        <div className="flex h-[calc(100vh-64px)] bg-[#f8fafc]">
             {/* Sidebar */}
             <aside className="w-64 bg-zinc-900 text-white flex flex-col shadow-xl">
                 <div className="p-6">
@@ -117,16 +125,16 @@ const AdminDashboard = () => {
                             />
                             <StatCard 
                                 label="Conferences" 
-                                value="8" 
-                                change="+2" 
+                                value={stats.totalConferences} 
+                                change="+0" 
                                 icon={Calendar}
                                 color="emerald"
                                 onClick={() => setActiveTab('conferences')}
                             />
                             <StatCard 
                                 label="Submissions" 
-                                value="124" 
-                                change="+24" 
+                                value={stats.totalSubmissions} 
+                                change="+0" 
                                 icon={FileText}
                                 color="amber"
                                 onClick={() => setActiveTab('submissions')}
@@ -178,14 +186,28 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                {activeTab === 'users' && <UserManagement key={refreshKey} />}
+                {activeTab === 'users' && (
+                    <UserManagement 
+                        key={refreshKey} 
+                        onUpdate={() => setRefreshKey(prev => prev + 1)} 
+                    />
+                )}
                 
-                {activeTab === 'conferences' && <ConferenceManagement key={refreshKey} />}
+                {activeTab === 'conferences' && (
+                    <ConferenceManagement 
+                        key={refreshKey} 
+                        onUpdate={() => setRefreshKey(prev => prev + 1)} 
+                    />
+                )}
 
-                {['submissions', 'settings'].includes(activeTab) && (
-                   <div className="flex flex-col items-center justify-center h-64 bg-white rounded-3xl border border-zinc-200 border-dashed">
-                       <p className="text-zinc-400 font-medium">This module is coming soon...</p>
-                   </div>
+                {activeTab === 'submissions' && (
+                    <SubmissionManagement 
+                        key={refreshKey}
+                    />
+                )}
+
+                {activeTab === 'settings' && (
+                    <SiteSettings />
                 )}
             </main>
         </div>

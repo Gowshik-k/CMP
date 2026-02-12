@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Conference = require('../models/Conference');
+const Submission = require('../models/Submission');
 const responses = require('../utils/responses');
 const { ROLE_LIST, isValidRole } = require('../constants/roles');
 
@@ -23,7 +25,9 @@ exports.createUser = async (req, res, next) => {
             email,
             password, // Password hashing is handled by User model pre-save hook
             phoneNumber,
-            role: role || 'Attendee'
+            role: role || 'Attendee',
+            isEmailVerified: true,
+            isPhoneVerified: true
         });
 
         await newUser.save();
@@ -60,7 +64,11 @@ exports.updateUserRole = async (req, res, next) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { role },
+            {
+                role,
+                isEmailVerified: true,
+                isPhoneVerified: true
+            },
             { new: true }
         ).select('-password');
 
@@ -93,14 +101,61 @@ exports.deleteUser = async (req, res, next) => {
 exports.getStats = async (req, res, next) => {
     try {
         const totalUsers = await User.countDocuments();
+        const totalConferences = await Conference.countDocuments();
+        const totalSubmissions = await Submission.countDocuments();
+        const recentConferences = await Conference.find()
+            .sort({ createdAt: -1 })
+            .limit(3);
         const roleDistribution = await User.aggregate([
             { $group: { _id: '$role', count: { $sum: 1 } } }
         ]);
 
         return responses.success(res, {
             totalUsers,
+            totalConferences,
+            totalSubmissions,
+            recentConferences,
             roleDistribution
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get all submissions
+exports.getAllSubmissions = async (req, res, next) => {
+    try {
+        const submissions = await Submission.find()
+            .populate('author', 'username email')
+            .populate('conference', 'title')
+            .sort({ submittedAt: -1 });
+        return responses.success(res, submissions);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Update submission status
+exports.updateSubmissionStatus = async (req, res, next) => {
+    try {
+        const { status } = req.body;
+        const validStatuses = ['Under Review', 'Accepted', 'Rejected'];
+
+        if (!status || !validStatuses.includes(status)) {
+            return responses.badRequest(res, 'Invalid status. Must be one of: ' + validStatuses.join(', '));
+        }
+
+        const submission = await Submission.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        ).populate('author', 'username email').populate('conference', 'title');
+
+        if (!submission) {
+            return responses.notFound(res, 'Submission not found');
+        }
+
+        return responses.success(res, submission, 'Submission status updated successfully');
     } catch (error) {
         next(error);
     }

@@ -9,5 +9,6 @@ router.get('/dashboard', userController.getUserDashboardData);
 router.get('/conferences', userController.getAllConferences);
 router.post('/register', userController.registerForConference);
 router.post('/submit', userController.submitPaper);
+router.put('/profile', userController.updateProfile);
 
 module.exports = router;

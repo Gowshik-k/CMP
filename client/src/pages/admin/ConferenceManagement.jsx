@@ -3,7 +3,7 @@ import { Plus, Search, Calendar, MapPin, Edit2, Trash2, Clock, AlertCircle, Chec
 import { adminAPI } from '../../api';
 import ConferenceModal from './ConferenceModal';
 
-const ConferenceManagement = () => {
+const ConferenceManagement = ({ onUpdate }) => {
     const [conferences, setConferences] = useState([]);
     const [loading, setLoading] = useState(true);
     const [view, setView] = useState('upcoming'); // 'upcoming' or 'history'
@@ -37,6 +37,7 @@ const ConferenceManagement = () => {
             await adminAPI.createConference(prepareData(data));
             setShowModal(false);
             setRefreshKey(prev => prev + 1);
+            onUpdate?.();
         } catch (err) {
             console.error('Error creating conference:', err);
             alert('Failed to create conference. Please check the console for details.');
@@ -49,6 +50,7 @@ const ConferenceManagement = () => {
             setShowModal(false);
             setSelectedConference(null);
             setRefreshKey(prev => prev + 1);
+            onUpdate?.();
         } catch (err) {
             console.error('Error updating conference:', err);
             alert('Failed to update conference. Please check the console for details.');
@@ -60,6 +62,7 @@ const ConferenceManagement = () => {
             try {
                 await adminAPI.deleteConference(id);
                 setRefreshKey(prev => prev + 1);
+                onUpdate?.();
             } catch (err) {
                 console.error('Error deleting conference:', err);
             }

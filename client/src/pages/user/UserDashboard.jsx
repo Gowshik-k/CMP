@@ -10,14 +10,23 @@ import {
     ChevronRight,
     Search,
     MapPin,
-    CheckCircle2
+    CheckCircle2,
+    Globe,
+    Linkedin,
+    Twitter,
+    Save,
+    X,
+    ExternalLink,
+    GraduationCap,
+    Shield,
+    BookOpen
 } from 'lucide-react';
 import { participantAPI } from '../../api';
 import UserConferenceBrowser from './UserConferenceBrowser';
 import RegistrationModal from './RegistrationModal';
 import SubmissionModal from './SubmissionModal';
 
-const UserDashboard = () => {
+const UserDashboard = ({ user, setUser }) => {
     const [activeTab, setActiveTab] = useState('overview');
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -28,13 +37,19 @@ const UserDashboard = () => {
     const [showSubModal, setShowSubModal] = useState(false);
     const [selectedConf, setSelectedConf] = useState(null);
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    // Use current user from props (fallback to localStorage if needed, but props preferred)
+    const currentUser = user || JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
                 const res = await participantAPI.getDashboardData();
                 setUserData(res.data.data);
+                // Sync user state if backend returns updated user info
+                if (setUser && res.data.data.user) {
+                    setUser(res.data.data.user);
+                    localStorage.setItem('user', JSON.stringify(res.data.data.user));
+                }
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching dashboard data:', err);
@@ -45,8 +60,8 @@ const UserDashboard = () => {
     }, [refreshKey]);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.clear();
+        if (setUser) setUser(null);
         window.location.href = '/login';
     };
 
@@ -74,6 +89,62 @@ const UserDashboard = () => {
         }
     };
 
+    // Profile States
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileForm, setProfileForm] = useState({
+        affiliation: currentUser?.affiliation || '',
+        bio: currentUser?.bio || '',
+        phoneNumber: currentUser?.phoneNumber || '',
+        socialLinks: {
+            linkedin: currentUser?.socialLinks?.linkedin || '',
+            orcid: currentUser?.socialLinks?.orcid || '',
+            twitter: currentUser?.socialLinks?.twitter || ''
+        }
+    });
+
+    // Update form when user data changes
+    useEffect(() => {
+        if (currentUser) {
+            setProfileForm({
+                affiliation: currentUser.affiliation || '',
+                bio: currentUser.bio || '',
+                phoneNumber: currentUser.phoneNumber || '',
+                socialLinks: {
+                    linkedin: currentUser.socialLinks?.linkedin || '',
+                    orcid: currentUser.socialLinks?.orcid || '',
+                    twitter: currentUser.socialLinks?.twitter || ''
+                }
+            });
+        }
+    }, [currentUser]);
+
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await participantAPI.updateProfile(profileForm);
+            localStorage.setItem('user', JSON.stringify(res.data.data));
+            if (setUser) setUser(res.data.data);
+            setIsEditingProfile(false);
+            setRefreshKey(prev => prev + 1);
+            alert('Profile updated successfully!');
+        } catch (err) {
+            console.error('Profile update error:', err);
+            alert(err.response?.data?.message || 'Error updating profile');
+        }
+    };
+
+    const calculateTrustScore = () => {
+        let score = 0;
+        if (currentUser?.isEmailVerified) score += 30;
+        if (currentUser?.isPhoneVerified) score += 30;
+        if (currentUser?.affiliation) score += 10;
+        if (currentUser?.bio) score += 15;
+        if (currentUser?.socialLinks?.linkedin || currentUser?.socialLinks?.orcid || currentUser?.socialLinks?.twitter) score += 15;
+        return score;
+    };
+
+    const isFullyVerified = currentUser?.isEmailVerified && currentUser?.isPhoneVerified;
+
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -87,6 +158,9 @@ const UserDashboard = () => {
         { id: 'conferences', name: 'Conferences', icon: Calendar },
         { id: 'registrations', name: 'My Registrations', icon: ClipboardList },
         { id: 'submissions', name: 'My Submissions', icon: FileText },
+        // Role-specific tabs
+        ...(currentUser?.role === 'Reviewer' ? [{ id: 'reviews', name: 'Review Assigned', icon: BookOpen }] : []),
+        ...(currentUser?.role === 'Chair' ? [{ id: 'portal', name: 'Conference Portal', icon: Shield }] : []),
         { id: 'profile', name: 'Profile', icon: User },
     ];
 
@@ -97,11 +171,11 @@ const UserDashboard = () => {
                 <div className="p-6">
                     <div className="flex items-center gap-3 px-2 py-3 bg-zinc-50 rounded-2xl border border-zinc-100">
                         <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
-                            {user?.username?.[0]?.toUpperCase()}
+                            {currentUser?.username?.[0]?.toUpperCase()}
                         </div>
                         <div className="overflow-hidden">
-                            <p className="font-bold text-zinc-900 truncate">{user?.username}</p>
-                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{user?.role}</p>
+                            <p className="font-bold text-zinc-900 truncate">{currentUser?.username}</p>
+                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{currentUser?.role}</p>
                         </div>
                     </div>
                 </div>
@@ -155,28 +229,28 @@ const UserDashboard = () => {
                         <div className="h-8 w-px bg-zinc-200 mx-2"></div>
                         <div className="flex items-center gap-3">
                             <div className="text-right hidden sm:block">
-                                <p className="text-xs font-black text-zinc-900 leading-none mb-0.5">{user?.username}</p>
-                                <p className="text-[10px] font-bold text-zinc-400">{user?.email}</p>
+                                <p className="text-xs font-black text-zinc-900 leading-none mb-0.5">{currentUser?.username}</p>
+                                <p className="text-[10px] font-bold text-zinc-400">{currentUser?.email}</p>
                             </div>
                         </div>
                     </div>
                 </header>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-zinc-50/50">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-zinc-50/50">
                     {activeTab === 'overview' && (
-                        <div className="space-y-8 animate-fade-in-up">
+                        <div className="space-y-6 animate-fade-in-up">
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div 
-                                    className="bg-white p-7 rounded-[2rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group" 
+                                    className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group" 
                                     onClick={() => setActiveTab('registrations')}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        <ClipboardList className="w-6 h-6" />
+                                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                        <ClipboardList className="w-5 h-5" />
                                     </div>
-                                    <p className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-1">Registrations</p>
-                                    <h3 className="text-4xl font-black text-zinc-900">{userData?.registrations?.length || 0}</h3>
+                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Registrations</p>
+                                    <h3 className="text-3xl font-black text-zinc-900">{userData?.registrations?.length || 0}</h3>
                                     <div className="flex items-center gap-2 mt-4">
                                         <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-md">ACTIVE</span>
                                         <p className="text-[10px] text-zinc-400 font-bold">Manage your tickets</p>
@@ -184,27 +258,29 @@ const UserDashboard = () => {
                                 </div>
 
                                 <div 
-                                    className="bg-white p-7 rounded-[2rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 group" 
+                                    className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 group" 
                                     onClick={() => setActiveTab('submissions')}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        <FileText className="w-6 h-6" />
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                        <FileText className="w-5 h-5" />
                                     </div>
-                                    <p className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-1">Submissions</p>
-                                    <h3 className="text-4xl font-black text-zinc-900">{userData?.submissions?.length || 0}</h3>
+                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Submissions</p>
+                                    <h3 className="text-3xl font-black text-zinc-900">{userData?.submissions?.length || 0}</h3>
                                     <div className="flex items-center gap-2 mt-4">
                                         <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded-md">PAPERS</span>
                                         <p className="text-[10px] text-zinc-400 font-bold">Track review status</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-zinc-900 p-7 rounded-[2rem] shadow-2xl shadow-zinc-900/20 text-white relative overflow-hidden group">
+                                 <div className="bg-zinc-900 p-5 rounded-[1.5rem] shadow-2xl shadow-zinc-900/20 text-white relative overflow-hidden group">
                                     <div className="relative z-10">
-                                        <p className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-1">Profile Status</p>
-                                        <h3 className="text-3xl font-black mb-2">{user?.role}</h3>
-                                        <div className="flex items-center gap-2 mt-4 text-zinc-400">
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                            <p className="text-[10px] font-bold">Account Verified</p>
+                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Profile Status</p>
+                                        <h3 className="text-2xl font-black mb-1">{currentUser?.role}</h3>
+                                        <div className="flex items-center gap-2 mt-4">
+                                            <CheckCircle2 className={`w-4 h-4 ${isFullyVerified ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                                            <p className={`text-[10px] font-bold ${isFullyVerified ? 'text-zinc-400' : 'text-zinc-500 italic'}`}>
+                                                {isFullyVerified ? 'Account Verified' : 'Verification Pending'}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
@@ -212,9 +288,9 @@ const UserDashboard = () => {
                             </div>
 
                             {/* Activity Grid */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                <div className="bg-white rounded-[2.5rem] border border-zinc-200 p-8 shadow-sm">
-                                    <div className="flex items-center justify-between mb-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="bg-white rounded-[1.5rem] border border-zinc-200 p-6 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
                                         <div>
                                             <h4 className="font-black text-zinc-900 text-lg">My Conferences</h4>
                                             <p className="text-xs font-bold text-zinc-400">Your upcoming events</p>
@@ -250,8 +326,8 @@ const UserDashboard = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-[2.5rem] border border-zinc-200 p-8 shadow-sm">
-                                    <div className="flex items-center justify-between mb-8">
+                                <div className="bg-white rounded-[1.5rem] border border-zinc-200 p-6 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
                                         <div>
                                             <h4 className="font-black text-zinc-900 text-lg">My Submissions</h4>
                                             <p className="text-xs font-bold text-zinc-400">Track your research papers</p>
@@ -399,72 +475,216 @@ const UserDashboard = () => {
                     )}
 
                     {activeTab === 'profile' && (
-                        <div className="max-w-4xl animate-fade-in-up">
-                            <div className="bg-white rounded-[3.5rem] border border-zinc-200 shadow-sm overflow-hidden">
-                                <div className="h-40 bg-zinc-900 relative">
-                                    <div className="absolute -bottom-16 left-12">
-                                        <div className="w-32 h-32 rounded-[2.5rem] bg-indigo-600 border-8 border-white flex items-center justify-center text-white text-5xl font-black shadow-2xl">
-                                            {user?.username?.[0]?.toUpperCase()}
-                                        </div>
-                                    </div>
-                                    <div className="absolute top-8 right-8">
-                                        <button className="px-6 py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white hover:text-zinc-900 transition-all">
-                                            Change Cover
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="pt-20 px-12 pb-12">
-                                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                                        <div className="space-y-2">
-                                            <h3 className="text-4xl font-black text-zinc-900 tracking-tight">{user?.username}</h3>
-                                            <div className="flex flex-wrap gap-3">
-                                                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-zinc-100 rounded-full text-[10px] font-black text-zinc-600 uppercase tracking-widest">
-                                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                                    {user?.role} Account
-                                                </div>
-                                                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 rounded-full text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                                                    Member Since {new Date(user?.createdAt).getFullYear()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button className="px-8 py-4 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-zinc-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group">
-                                            <User className="w-4 h-4 group-hover:text-blue-400 transition-colors" />
-                                            Edit Full Profile
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-12 border-t border-zinc-100">
-                                        <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 group hover:border-blue-200 transition-all">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Email Address</p>
-                                            <p className="text-sm font-black text-zinc-900 group-hover:text-blue-600">{user?.email}</p>
-                                        </div>
-                                        <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 group hover:border-blue-200 transition-all">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Phone Number</p>
-                                            <p className="text-sm font-black text-zinc-900 group-hover:text-blue-600">{user?.phoneNumber}</p>
-                                        </div>
-                                        <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 group hover:border-blue-200 transition-all">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Verification</p>
-                                            <p className="text-sm font-black text-emerald-600 flex items-center gap-2">
-                                                <CheckCircle2 className="w-4 h-4" />
-                                                Fully Verified
-                                            </p>
-                                        </div>
-                                        <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 group">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Affiliation</p>
-                                            <p className="text-sm font-bold text-zinc-300 italic">No institution listed</p>
-                                        </div>
-                                        <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 group">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Bio</p>
-                                            <p className="text-sm font-bold text-zinc-300 italic">No bio written yet</p>
-                                        </div>
-                                        <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 group">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Social</p>
-                                            <p className="text-sm font-bold text-zinc-300 italic">LinkedIn / ORCID not linked</p>
-                                        </div>
-                                    </div>
+                        <div className="max-w-5xl animate-fade-in-up">
+                            {/* Simple Header (Seamless) */}
+                            <div className="mb-8">
+                                <h3 className="text-3xl font-black text-zinc-900 tracking-tight mb-2">{currentUser?.username}</h3>
+                                <div className="flex gap-3">
+                                    <span className="px-3 py-1.5 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest">{currentUser?.role}</span>
+                                    <span className="px-3 py-1.5 bg-white border border-zinc-200 text-zinc-500 rounded-full text-[10px] font-black uppercase tracking-widest">Since {new Date(currentUser?.createdAt).getFullYear()}</span>
+                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${isFullyVerified ? 'bg-emerald-50 text-emerald-600' : 'bg-zinc-100 text-zinc-400'}`}>
+                                        <CheckCircle2 className="w-3 h-3" /> {isFullyVerified ? 'Identity Verified' : 'Unverified Account'}
+                                    </span>
                                 </div>
                             </div>
+
+                            <div className="mt-10 flex justify-between items-center mb-8">
+                                <h4 className="text-xl font-black text-zinc-900 tracking-tight">Profile Details</h4>
+                                {!isEditingProfile ? (
+                                    <button 
+                                        onClick={() => setIsEditingProfile(true)}
+                                        className="px-6 py-3 bg-white border border-zinc-200 text-zinc-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-3"
+                                    >
+                                        <User className="w-4 h-4 text-blue-600" />
+                                        Edit Particulars
+                                    </button>
+                                ) : (
+                                    <div className="flex gap-4">
+                                        <button 
+                                            onClick={() => setIsEditingProfile(false)}
+                                            className="px-5 py-3 bg-zinc-100 text-zinc-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all flex items-center gap-2"
+                                        >
+                                            <X className="w-4 h-4" /> Cancel
+                                        </button>
+                                        <button 
+                                            onClick={handleProfileUpdate}
+                                            className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                                        >
+                                            <Save className="w-4 h-4" /> Save Changes
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Left Section: General */}
+                                <div className="lg:col-span-2 space-y-8">
+                                    <section>
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                                <GraduationCap className="w-4 h-4" />
+                                            </div>
+                                            <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Personal & Academic</h5>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Email Address</label>
+                                                <div className="p-4 rounded-[1.2rem] bg-zinc-100/50 border border-zinc-100 text-zinc-400 font-bold text-xs cursor-not-allowed">
+                                                    {currentUser?.email}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Phone Number</label>
+                                                {isEditingProfile ? (
+                                                    <input 
+                                                        type="text"
+                                                        value={profileForm.phoneNumber}
+                                                        onChange={(e) => setProfileForm({...profileForm, phoneNumber: e.target.value})}
+                                                        className="w-full p-4 rounded-[1.2rem] bg-white border border-zinc-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-xs"
+                                                        placeholder="+1 (555) 000-0000"
+                                                    />
+                                                ) : (
+                                                    <div className="p-4 rounded-[1.2rem] bg-white border border-zinc-200 text-zinc-900 font-bold text-xs">
+                                                        {currentUser?.phoneNumber || 'Not provided'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="md:col-span-2 space-y-2">
+                                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Affiliation / Institution</label>
+                                                {isEditingProfile ? (
+                                                    <input 
+                                                        type="text"
+                                                        value={profileForm.affiliation}
+                                                        onChange={(e) => setProfileForm({...profileForm, affiliation: e.target.value})}
+                                                        className="w-full p-4 rounded-[1.2rem] bg-white border border-zinc-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-xs"
+                                                        placeholder="e.g. Stanford University"
+                                                    />
+                                                ) : (
+                                                    <div className={`p-4 rounded-[1.2rem] bg-white border border-zinc-200 text-xs font-bold ${!currentUser?.affiliation ? 'text-zinc-300 italic' : 'text-zinc-900'}`}>
+                                                        {currentUser?.affiliation || 'No institution listed'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="md:col-span-2 space-y-2">
+                                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Short Bio</label>
+                                                {isEditingProfile ? (
+                                                    <textarea 
+                                                        rows="3"
+                                                        value={profileForm.bio}
+                                                        onChange={(e) => setProfileForm({...profileForm, bio: e.target.value})}
+                                                        className="w-full p-5 rounded-[1.5rem] bg-white border border-zinc-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-xs resize-none"
+                                                        placeholder="Write a brief professional bio..."
+                                                    />
+                                                ) : (
+                                                    <div className={`p-5 rounded-[1.5rem] bg-white border border-zinc-200 text-xs font-bold leading-relaxed ${!currentUser?.bio ? 'text-zinc-300 italic' : 'text-zinc-900 font-medium'}`}>
+                                                        {currentUser?.bio || 'No bio written yet. Share your interests and field of study.'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                {/* Right Section: Social & Status */}
+                                <div className="space-y-8">
+                                    <section>
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                                <Globe className="w-4 h-4" />
+                                            </div>
+                                            <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Connect</h5>
+                                        </div>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="p-5 rounded-[1.5rem] bg-white border border-zinc-200 group hover:border-blue-200 transition-all">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <Linkedin className="w-4 h-4 text-blue-600" />
+                                                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">LinkedIn</span>
+                                                    </div>
+                                                    {!isEditingProfile && currentUser?.socialLinks?.linkedin && <ExternalLink className="w-3 h-3 text-zinc-300" />}
+                                                </div>
+                                                {isEditingProfile ? (
+                                                    <input 
+                                                        type="text"
+                                                        value={profileForm.socialLinks.linkedin}
+                                                        onChange={(e) => setProfileForm({
+                                                            ...profileForm, 
+                                                            socialLinks: {...profileForm.socialLinks, linkedin: e.target.value}
+                                                        })}
+                                                        className="w-full p-2.5 bg-zinc-50 rounded-lg border-none text-[10px] font-bold outline-none"
+                                                        placeholder="Profile URL"
+                                                    />
+                                                ) : (
+                                                    <p className={`text-[10px] font-bold truncate ${currentUser?.socialLinks?.linkedin ? 'text-zinc-900' : 'text-zinc-300 italic'}`}>
+                                                        {currentUser?.socialLinks?.linkedin || 'Not linked'}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="p-5 rounded-[1.5rem] bg-white border border-zinc-200 group hover:border-indigo-200 transition-all">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded bg-indigo-600 flex items-center justify-center text-white text-[8px] font-black">ID</div>
+                                                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">ORCID</span>
+                                                    </div>
+                                                </div>
+                                                {isEditingProfile ? (
+                                                    <input 
+                                                        type="text"
+                                                        value={profileForm.socialLinks.orcid}
+                                                        onChange={(e) => setProfileForm({
+                                                            ...profileForm, 
+                                                            socialLinks: {...profileForm.socialLinks, orcid: e.target.value}
+                                                        })}
+                                                        className="w-full p-2.5 bg-zinc-50 rounded-lg border-none text-[10px] font-bold outline-none"
+                                                        placeholder="ORCID iD"
+                                                    />
+                                                ) : (
+                                                    <p className={`text-[10px] font-bold truncate ${currentUser?.socialLinks?.orcid ? 'text-zinc-900' : 'text-zinc-300 italic'}`}>
+                                                        {currentUser?.socialLinks?.orcid || 'No ORCID ID'}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="p-5 rounded-[1.5rem] bg-zinc-900 text-white shadow-2xl shadow-zinc-900/20 relative overflow-hidden group">
+                                                <div className="relative z-10">
+                                                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3">Account Health</p>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <CheckCircle2 className={`w-4 h-4 ${calculateTrustScore() === 100 ? 'text-emerald-400' : 'text-blue-400'}`} />
+                                                        <span className="text-xs font-black">Trust Score {calculateTrustScore()}%</span>
+                                                    </div>
+                                                    <p className={`text-[9px] font-bold ${isFullyVerified ? 'text-zinc-400' : 'text-zinc-500'} ml-6 italic`}>
+                                                        {isFullyVerified ? 'Identity Verified' : 'Identity Unverified'}
+                                                    </p>
+                                                </div>
+                                                <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'reviews' && (
+                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[3rem] border border-zinc-200 border-dashed animate-fade-in-up">
+                            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-3xl flex items-center justify-center mb-6">
+                                <BookOpen className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-bold text-zinc-900 mb-2">Reviewer Portal</h3>
+                            <p className="text-zinc-500 text-sm max-w-sm text-center">No papers have been assigned to you for review yet. You will be notified when assignments are available.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'portal' && (
+                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[3rem] border border-zinc-200 border-dashed animate-fade-in-up">
+                            <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mb-6">
+                                <Shield className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-bold text-zinc-900 mb-2">Conference Chair Portal</h3>
+                            <p className="text-zinc-500 text-sm max-w-sm text-center">Manage your assigned conferences, review tracks, and submission deadlines from here. Module loading...</p>
                         </div>
                     )}
                 </div>

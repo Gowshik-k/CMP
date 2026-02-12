@@ -76,7 +76,14 @@ export const adminAPI = {
         apiClient.put(`/admin/conferences/${id}`, data),
 
     deleteConference: (id) =>
-        apiClient.delete(`/admin/conferences/${id}`)
+        apiClient.delete(`/admin/conferences/${id}`),
+
+    // Submissions Management
+    getAllSubmissions: () =>
+        apiClient.get('/admin/submissions'),
+
+    updateSubmissionStatus: (id, status) =>
+        apiClient.patch(`/admin/submissions/${id}/status`, { status })
 };
 
 export const participantAPI = {
@@ -90,7 +97,10 @@ export const participantAPI = {
         apiClient.post('/participant/register', { conferenceId }),
 
     submitPaper: (data) =>
-        apiClient.post('/participant/submit', data)
+        apiClient.post('/participant/submit', data),
+
+    updateProfile: (data) =>
+        apiClient.put('/participant/profile', data)
 };
 
 export default apiClient;

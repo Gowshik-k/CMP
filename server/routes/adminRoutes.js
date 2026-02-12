@@ -12,6 +12,8 @@ router.post('/users', adminController.createUser);
 router.patch('/users/:id/role', adminController.updateUserRole);
 router.delete('/users/:id', adminController.deleteUser);
 router.get('/stats', adminController.getStats);
+router.get('/submissions', adminController.getAllSubmissions);
+router.patch('/submissions/:id/status', adminController.updateSubmissionStatus);
 
 // Conference Routes
 const conferenceController = require('../controllers/conferenceController');

@@ -32,7 +32,7 @@ function App() {
 
           {/* User Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Attendee', 'Author', 'Reviewer', 'Chair']} />}>
-            <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/dashboard" element={<UserDashboard user={user} setUser={setUser} />} />
           </Route>
         </Routes>
       </div>

@@ -46,6 +46,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    affiliation: {
+        type: String,
+        default: ''
+    },
+    bio: {
+        type: String,
+        default: ''
+    },
+    socialLinks: {
+        linkedin: { type: String, default: '' },
+        orcid: { type: String, default: '' },
+        twitter: { type: String, default: '' }
+    },
     createdAt: {
         type: Date,
         default: Date.now

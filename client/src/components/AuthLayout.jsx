@@ -1,6 +1,6 @@
 const AuthLayout = ({ children, title, subtitle }) => {
   return (
-    <div className="flex h-screen w-full bg-white overflow-hidden pt-16">
+    <div className="flex h-[calc(100vh-64px)] w-full bg-white overflow-hidden">
       {/* Left Panel - Professional/Dark */}
       <div className="hidden lg:flex w-2/5 flex-col justify-between bg-zinc-900 p-12 text-white relative overflow-hidden">
         {/* Abstract Architectural Lines */}
