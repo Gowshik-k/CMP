@@ -17,7 +17,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen font-sans text-text-primary bg-bg-secondary">
+      <div className="min-h-screen font-sans text-text-primary bg-bg-secondary pt-16">
         <Navbar user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<Home />} />
