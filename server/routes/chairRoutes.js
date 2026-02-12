@@ -13,4 +13,9 @@ router.post('/assign', chairController.assignReviewer);
 router.get('/conferences/:conferenceId/submissions', chairController.getConferenceSubmissions);
 router.patch('/submissions/:id/status', chairController.updateSubmissionStatus);
 
+// Conference CRUD for Chairs
+router.post('/', chairController.createConference);
+router.put('/:id', chairController.updateConference);
+router.delete('/:id', chairController.deleteConference);
+
 module.exports = router;

@@ -138,3 +138,90 @@ exports.updateSubmissionStatus = async (req, res, next) => {
         next(error);
     }
 };
+// Create a new conference (Chair/Admin)
+exports.createConference = async (req, res, next) => {
+    try {
+        const {
+            title, description, startDate, endDate, submissionDeadline, location,
+            mode, themes, acceptanceNotification, registrationFees,
+            contactEmail, contactPhone, convenors
+        } = req.body;
+
+        const conference = new Conference({
+            title,
+            description,
+            startDate,
+            endDate,
+            submissionDeadline: submissionDeadline || undefined,
+            location,
+            mode,
+            themes,
+            acceptanceNotification: acceptanceNotification || undefined,
+            registrationFees,
+            contactEmail,
+            contactPhone,
+            convenors,
+            createdBy: req.user._id
+        });
+
+        await conference.save();
+        return responses.created(res, conference, 'Conference created successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Update an existing conference (Must be the creator)
+exports.updateConference = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        const conference = await Conference.findById(id);
+        if (!conference) return responses.notFound(res, 'Conference not found');
+
+        // Verify ownership
+        if (conference.createdBy.toString() !== req.user._id.toString()) {
+            return responses.forbidden(res, 'Access denied: You do not manage this conference');
+        }
+
+        // Apply updates
+        Object.keys(updates).forEach(key => {
+            if (updates[key] !== undefined) {
+                conference[key] = updates[key];
+            }
+        });
+
+        await conference.save();
+        return responses.success(res, conference, 'Conference updated successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Delete a conference (Must be the creator)
+exports.deleteConference = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const conference = await Conference.findById(id);
+        if (!conference) return responses.notFound(res, 'Conference not found');
+
+        // Verify ownership
+        if (conference.createdBy.toString() !== req.user._id.toString()) {
+            return responses.forbidden(res, 'Access denied: You do not manage this conference');
+        }
+
+        // Check if there are any submissions before deleting? 
+        // For simplicity, we'll allow deletion, but in a real-world app, we might prevent it if active.
+        await Conference.findByIdAndDelete(id);
+
+        // Also clean up associated submissions and reviews?
+        await Submission.deleteMany({ conference: id });
+        await Review.deleteMany({ conference: id });
+
+        return responses.success(res, null, 'Conference and all associated data deleted successfully');
+    } catch (error) {
+        next(error);
+    }
+};

@@ -117,7 +117,16 @@ export const chairAPI = {
         apiClient.get(`/chair/conferences/${conferenceId}/submissions`),
 
     updateSubmissionStatus: (id, status) =>
-        apiClient.patch(`/chair/submissions/${id}/status`, { status })
+        apiClient.patch(`/chair/submissions/${id}/status`, { status }),
+
+    createConference: (data) =>
+        apiClient.post('/chair', data),
+
+    updateConference: (id, data) =>
+        apiClient.put(`/chair/${id}`, data),
+
+    deleteConference: (id) =>
+        apiClient.delete(`/chair/${id}`)
 };
 
 export const reviewerAPI = {

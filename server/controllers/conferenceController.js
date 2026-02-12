@@ -21,7 +21,11 @@ exports.getAllConferences = async (req, res) => {
 
 exports.createConference = async (req, res) => {
     try {
-        const { title, description, startDate, endDate, submissionDeadline, location } = req.body;
+        const {
+            title, description, startDate, endDate, submissionDeadline, location,
+            mode, themes, acceptanceNotification, registrationFees,
+            contactEmail, contactPhone, convenors
+        } = req.body;
 
         const conference = new Conference({
             title,
@@ -30,6 +34,13 @@ exports.createConference = async (req, res) => {
             endDate,
             submissionDeadline,
             location,
+            mode,
+            themes,
+            acceptanceNotification,
+            registrationFees,
+            contactEmail,
+            contactPhone,
+            convenors,
             createdBy: req.user._id
         });
 

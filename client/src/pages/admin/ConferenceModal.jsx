@@ -8,7 +8,19 @@ const ConferenceModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
         startDate: '',
         endDate: '',
         submissionDeadline: '',
-        location: ''
+        location: '',
+        mode: 'In-Person',
+        themes: '',
+        acceptanceNotification: '',
+        registrationFees: {
+            ugPgStudents: 0,
+            facultyResearchScholars: 0,
+            externalOnlinePresentation: 0,
+            industryPersonnel: 0
+        },
+        contactEmail: '',
+        contactPhone: '',
+        convenors: ''
     });
 
     useEffect(() => {
@@ -19,7 +31,19 @@ const ConferenceModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
                 startDate: initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : '',
                 endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : '',
                 submissionDeadline: initialData.submissionDeadline ? new Date(initialData.submissionDeadline).toISOString().split('T')[0] : '',
-                location: initialData.location || ''
+                location: initialData.location || '',
+                mode: initialData.mode || 'In-Person',
+                themes: initialData.themes || '',
+                acceptanceNotification: initialData.acceptanceNotification ? new Date(initialData.acceptanceNotification).toISOString().split('T')[0] : '',
+                registrationFees: initialData.registrationFees || {
+                    ugPgStudents: 0,
+                    facultyResearchScholars: 0,
+                    externalOnlinePresentation: 0,
+                    industryPersonnel: 0
+                },
+                contactEmail: initialData.contactEmail || '',
+                contactPhone: initialData.contactPhone || '',
+                convenors: initialData.convenors || ''
             });
         } else {
             setFormData({
@@ -28,13 +52,37 @@ const ConferenceModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
                 startDate: '',
                 endDate: '',
                 submissionDeadline: '',
-                location: ''
+                location: '',
+                mode: 'In-Person',
+                themes: '',
+                acceptanceNotification: '',
+                registrationFees: {
+                    ugPgStudents: 0,
+                    facultyResearchScholars: 0,
+                    externalOnlinePresentation: 0,
+                    industryPersonnel: 0
+                },
+                contactEmail: '',
+                contactPhone: '',
+                convenors: ''
             });
         }
     }, [initialData, isOpen]);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name.includes('.')) {
+            const [parent, child] = name.split('.');
+            setFormData(prev => ({
+                ...prev,
+                [parent]: {
+                    ...prev[parent],
+                    [child]: value === '' ? 0 : Number(value)
+                }
+            }));
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleSubmit = (e) => {
@@ -163,6 +211,127 @@ const ConferenceModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Event Mode</label>
+                                <select
+                                    name="mode"
+                                    value={formData.mode}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white text-zinc-900 font-medium transition-all"
+                                >
+                                    <option value="In-Person">In-Person</option>
+                                    <option value="Online">Online</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Acceptance Notification</label>
+                                <input
+                                    type="date"
+                                    name="acceptanceNotification"
+                                    value={formData.acceptanceNotification}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white text-zinc-900 font-medium transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Conference Themes</label>
+                            <textarea
+                                name="themes"
+                                value={formData.themes}
+                                onChange={handleChange}
+                                rows="3"
+                                className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white text-zinc-900 font-medium transition-all resize-none"
+                                placeholder="Innovations in Civil, Computer Science, etc..."
+                            />
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-xs font-black text-zinc-400 uppercase tracking-widest block border-b border-zinc-100 pb-2 italic">Registration Fees (in Rs.)</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight ml-1">UG/PG Students</label>
+                                    <input
+                                        type="number"
+                                        name="registrationFees.ugPgStudents"
+                                        value={formData.registrationFees.ugPgStudents}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-blue-500 focus:bg-white text-zinc-900 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight ml-1">Faculty/Research Scholars</label>
+                                    <input
+                                        type="number"
+                                        name="registrationFees.facultyResearchScholars"
+                                        value={formData.registrationFees.facultyResearchScholars}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-blue-500 focus:bg-white text-zinc-900 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight ml-1">External/Online Presentation</label>
+                                    <input
+                                        type="number"
+                                        name="registrationFees.externalOnlinePresentation"
+                                        value={formData.registrationFees.externalOnlinePresentation}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-blue-500 focus:bg-white text-zinc-900 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight ml-1">Industry Personnel</label>
+                                    <input
+                                        type="number"
+                                        name="registrationFees.industryPersonnel"
+                                        value={formData.registrationFees.industryPersonnel}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-blue-500 focus:bg-white text-zinc-900 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Contact Email</label>
+                                <input
+                                    type="email"
+                                    name="contactEmail"
+                                    value={formData.contactEmail}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white text-zinc-900 font-medium transition-all"
+                                    placeholder="e.g. contact@conference.com"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Contact Phone</label>
+                                <input
+                                    type="text"
+                                    name="contactPhone"
+                                    value={formData.contactPhone}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white text-zinc-900 font-medium transition-all"
+                                    placeholder="e.g. +91 9790038605"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Convenors</label>
+                            <textarea
+                                name="convenors"
+                                value={formData.convenors}
+                                onChange={handleChange}
+                                rows="2"
+                                className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-blue-500/50 focus:bg-white text-zinc-900 font-medium transition-all resize-none"
+                                placeholder="Dr. M. Sowrirajan, Dr. P. Magudeaswaran..."
+                            />
                         </div>
                     </div>
 
