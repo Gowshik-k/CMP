@@ -103,4 +103,29 @@ export const participantAPI = {
         apiClient.put('/participant/profile', data)
 };
 
+export const chairAPI = {
+    getManagedConferences: () =>
+        apiClient.get('/chair/conferences'),
+
+    getAvailableReviewers: () =>
+        apiClient.get('/chair/reviewers'),
+
+    assignReviewer: (data) =>
+        apiClient.post('/chair/assign', data),
+
+    getConferenceSubmissions: (conferenceId) =>
+        apiClient.get(`/chair/conferences/${conferenceId}/submissions`),
+
+    updateSubmissionStatus: (id, status) =>
+        apiClient.patch(`/chair/submissions/${id}/status`, { status })
+};
+
+export const reviewerAPI = {
+    getAssignedReviews: () =>
+        apiClient.get('/reviewer/assigned'),
+
+    submitReview: (reviewId, data) =>
+        apiClient.post(`/reviewer/submit/${reviewId}`, data)
+};
+
 export default apiClient;

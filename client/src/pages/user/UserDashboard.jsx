@@ -25,6 +25,8 @@ import { participantAPI } from '../../api';
 import UserConferenceBrowser from './UserConferenceBrowser';
 import RegistrationModal from './RegistrationModal';
 import SubmissionModal from './SubmissionModal';
+import ChairPortal from './ChairPortal';
+import ReviewerPortal from './ReviewerPortal';
 
 const UserDashboard = ({ user, setUser }) => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -669,23 +671,11 @@ const UserDashboard = ({ user, setUser }) => {
                     )}
 
                     {activeTab === 'reviews' && (
-                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[3rem] border border-zinc-200 border-dashed animate-fade-in-up">
-                            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-3xl flex items-center justify-center mb-6">
-                                <BookOpen className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-bold text-zinc-900 mb-2">Reviewer Portal</h3>
-                            <p className="text-zinc-500 text-sm max-w-sm text-center">No papers have been assigned to you for review yet. You will be notified when assignments are available.</p>
-                        </div>
+                        <ReviewerPortal />
                     )}
 
                     {activeTab === 'portal' && (
-                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[3rem] border border-zinc-200 border-dashed animate-fade-in-up">
-                            <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mb-6">
-                                <Shield className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-bold text-zinc-900 mb-2">Conference Chair Portal</h3>
-                            <p className="text-zinc-500 text-sm max-w-sm text-center">Manage your assigned conferences, review tracks, and submission deadlines from here. Module loading...</p>
-                        </div>
+                        <ChairPortal />
                     )}
                 </div>
             </main>

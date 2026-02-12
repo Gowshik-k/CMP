@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 5000;
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const chairRoutes = require('./routes/chairRoutes');
+const reviewerRoutes = require('./routes/reviewerRoutes');
 
 app.use(cors());
 app.use(express.json());
@@ -20,6 +22,8 @@ app.use(express.json());
 app.use('/api/user', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/participant', userRoutes);
+app.use('/api/chair', chairRoutes);
+app.use('/api/reviewer', reviewerRoutes);
 
 // Basic health check route
 app.get('/api/status', (req, res) => {
