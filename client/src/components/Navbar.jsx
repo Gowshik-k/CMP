@@ -40,7 +40,7 @@ const Navbar = ({ user, setUser }) => {
                     >
                         Home
                     </Link>
-                    {!isActive('/admin') && (
+                    {isActive('/') && (
                         <>
                             <a href="/#conferences" className="text-zinc-600 hover:text-blue-600 font-medium transition-colors">Conferences</a>
                             <a href="/#about" className="text-zinc-600 hover:text-blue-600 font-medium transition-colors">About Us</a>

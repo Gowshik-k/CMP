@@ -183,44 +183,12 @@ const ChairPortal = () => {
         );
     }
 
-    // Conference Selection View
     // Final UI Rendering
     return (
         <div className="flex-1">
             {!selectedConf ? (
                 <div className="flex-1 flex flex-col gap-8 animate-fade-in pb-12">
-                    {/* Header Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-200 shadow-sm flex items-center justify-between group hover:shadow-xl transition-all">
-                            <div>
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2">My Conferences</p>
-                                <h3 className="text-3xl font-black text-zinc-900">{conferences.length}</h3>
-                            </div>
-                            <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <Shield className="w-7 h-7" />
-                            </div>
-                        </div>
-                        <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-200 shadow-sm flex items-center justify-between group hover:shadow-xl transition-all">
-                            <div>
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2">Total Papers</p>
-                                <h3 className="text-3xl font-black text-zinc-900">{totalSubmissions}</h3>
-                            </div>
-                            <div className="w-14 h-14 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <FileText className="w-7 h-7" />
-                            </div>
-                        </div>
-                        <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-200 shadow-sm flex items-center justify-between group hover:shadow-xl transition-all">
-                            <div>
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2">Pending Reviews</p>
-                                <h3 className="text-3xl font-black text-zinc-900">{totalPendingReviews}</h3>
-                            </div>
-                            <div className="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <Activity className="w-7 h-7" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center justify-between">
                         <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Managed Conferences</h3>
                         <button 
                             onClick={openCreateModal}

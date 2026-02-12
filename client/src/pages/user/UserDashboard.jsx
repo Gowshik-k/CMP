@@ -19,9 +19,10 @@ import {
     ExternalLink,
     GraduationCap,
     Shield,
-    BookOpen
+    BookOpen,
+    Activity
 } from 'lucide-react';
-import { participantAPI } from '../../api';
+import { participantAPI, chairAPI } from '../../api';
 import UserConferenceBrowser from './UserConferenceBrowser';
 import RegistrationModal from './RegistrationModal';
 import SubmissionModal from './SubmissionModal';
@@ -38,6 +39,10 @@ const UserDashboard = ({ user, setUser }) => {
     const [showRegModal, setShowRegModal] = useState(false);
     const [showSubModal, setShowSubModal] = useState(false);
     const [selectedConf, setSelectedConf] = useState(null);
+
+    // Chair-specific state
+    const [chairConferences, setChairConferences] = useState([]);
+    const [chairSubmissions, setChairSubmissions] = useState([]);
 
     // Use current user from props (fallback to localStorage if needed, but props preferred)
     const currentUser = user || JSON.parse(localStorage.getItem('user'));
@@ -58,7 +63,37 @@ const UserDashboard = ({ user, setUser }) => {
                 setLoading(false);
             }
         };
+
+        const fetchChairData = async () => {
+            if (currentUser?.role === 'Chair') {
+                try {
+                    const res = await chairAPI.getManagedConferences();
+                    const conferences = res.data.data;
+                    setChairConferences(conferences);
+                    
+                    // Fetch submissions from all conferences
+                    const allSubmissions = [];
+                    for (const conf of conferences) {
+                        try {
+                            const subRes = await chairAPI.getConferenceSubmissions(conf._id);
+                            const submissions = subRes.data.data.map(sub => ({
+                                ...sub,
+                                conferenceName: conf.title
+                            }));
+                            allSubmissions.push(...submissions);
+                        } catch (err) {
+                            console.error(`Error fetching submissions for ${conf.title}:`, err);
+                        }
+                    }
+                    setChairSubmissions(allSubmissions);
+                } catch (err) {
+                    console.error('Error fetching chair conferences:', err);
+                }
+            }
+        };
+
         fetchDashboardData();
+        fetchChairData();
     }, [refreshKey]);
 
     const handleLogout = () => {
@@ -157,12 +192,17 @@ const UserDashboard = ({ user, setUser }) => {
 
     const tabs = [
         { id: 'overview', name: 'Overview', icon: LayoutDashboard },
-        { id: 'conferences', name: 'Conferences', icon: Calendar },
-        { id: 'registrations', name: 'My Registrations', icon: ClipboardList },
-        { id: 'submissions', name: 'My Submissions', icon: FileText },
+        // Only show Conferences, Registrations, and Submissions for regular users (not Chair/Reviewer)
+        ...(currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' ? [
+            { id: 'conferences', name: 'Conferences', icon: Calendar },
+            { id: 'registrations', name: 'My Registrations', icon: ClipboardList },
+            { id: 'submissions', name: 'My Submissions', icon: FileText },
+        ] : []),
         // Role-specific tabs
         ...(currentUser?.role === 'Reviewer' ? [{ id: 'reviews', name: 'Review Assigned', icon: BookOpen }] : []),
-        ...(currentUser?.role === 'Chair' ? [{ id: 'portal', name: 'Conference Portal', icon: Shield }] : []),
+        ...(currentUser?.role === 'Chair' ? [
+            { id: 'portal', name: 'Conference Portal', icon: Shield }
+        ] : []),
         { id: 'profile', name: 'Profile', icon: User },
     ];
 
@@ -244,35 +284,84 @@ const UserDashboard = ({ user, setUser }) => {
                         <div className="space-y-6 animate-fade-in-up">
                             {/* Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div 
-                                    className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group" 
-                                    onClick={() => setActiveTab('registrations')}
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                        <ClipboardList className="w-5 h-5" />
-                                    </div>
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Registrations</p>
-                                    <h3 className="text-3xl font-black text-zinc-900">{userData?.registrations?.length || 0}</h3>
-                                    <div className="flex items-center gap-2 mt-4">
-                                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-md">ACTIVE</span>
-                                        <p className="text-[10px] text-zinc-400 font-bold">Manage your tickets</p>
-                                    </div>
-                                </div>
+                                {/* Chair-specific stat cards */}
+                                {currentUser?.role === 'Chair' && (
+                                    <>
+                                        <div className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all duration-300 group"
+                                            onClick={() => setActiveTab('portal')}>
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                <Shield className="w-5 h-5" />
+                                            </div>
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Conferences</p>
+                                            <h3 className="text-3xl font-black text-zinc-900">{chairConferences.length}</h3>
+                                            <div className="flex items-center gap-2 mt-4">
+                                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-md">MANAGE</span>
+                                                <p className="text-[10px] text-zinc-400 font-bold">All events</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 group"
+                                            onClick={() => setActiveTab('portal')}>
+                                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                <FileText className="w-5 h-5" />
+                                            </div>
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Papers</p>
+                                            <h3 className="text-3xl font-black text-zinc-900">{chairConferences.reduce((acc, conf) => acc + (conf.stats?.submissions || 0), 0)}</h3>
+                                            <div className="flex items-center gap-2 mt-4">
+                                                <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded-md">SUBMISSIONS</span>
+                                                <p className="text-[10px] text-zinc-400 font-bold">Across all conferences</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1 transition-all duration-300 group"
+                                            onClick={() => setActiveTab('portal')}>
+                                            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                <Activity className="w-5 h-5" />
+                                            </div>
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Pending Reviews</p>
+                                            <h3 className="text-3xl font-black text-zinc-900">{chairConferences.reduce((acc, conf) => acc + (conf.stats?.pendingReviews || 0), 0)}</h3>
+                                            <div className="flex items-center gap-2 mt-4">
+                                                <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-black rounded-md">PENDING</span>
+                                                <p className="text-[10px] text-zinc-400 font-bold">Needs attention</p>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
 
-                                <div 
-                                    className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 group" 
-                                    onClick={() => setActiveTab('submissions')}
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                        <FileText className="w-5 h-5" />
+                                {/* Only show Registrations for regular users (not Chair/Reviewer) */}
+                                {currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' && (
+                                    <div 
+                                        className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group" 
+                                        onClick={() => setActiveTab('registrations')}
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <ClipboardList className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Registrations</p>
+                                        <h3 className="text-3xl font-black text-zinc-900">{userData?.registrations?.length || 0}</h3>
+                                        <div className="flex items-center gap-2 mt-4">
+                                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-md">ACTIVE</span>
+                                            <p className="text-[10px] text-zinc-400 font-bold">Manage your tickets</p>
+                                        </div>
                                     </div>
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Submissions</p>
-                                    <h3 className="text-3xl font-black text-zinc-900">{userData?.submissions?.length || 0}</h3>
-                                    <div className="flex items-center gap-2 mt-4">
-                                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded-md">PAPERS</span>
-                                        <p className="text-[10px] text-zinc-400 font-bold">Track review status</p>
+                                )}
+
+
+                                {/* Only show Submissions for regular users (not Chair/Reviewer) */}
+                                {currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' && (
+                                    <div 
+                                        className="bg-white p-5 rounded-[1.5rem] border border-zinc-200 shadow-sm cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 group" 
+                                        onClick={() => setActiveTab('submissions')}
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <FileText className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Submissions</p>
+                                        <h3 className="text-3xl font-black text-zinc-900">{userData?.submissions?.length || 0}</h3>
+                                        <div className="flex items-center gap-2 mt-4">
+                                            <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded-md">PAPERS</span>
+                                            <p className="text-[10px] text-zinc-400 font-bold">Track review status</p>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                  <div className="bg-zinc-900 p-5 rounded-[1.5rem] shadow-2xl shadow-zinc-900/20 text-white relative overflow-hidden group">
                                     <div className="relative z-10">
@@ -291,81 +380,88 @@ const UserDashboard = ({ user, setUser }) => {
 
                             {/* Activity Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div className="bg-white rounded-[1.5rem] border border-zinc-200 p-6 shadow-sm">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h4 className="font-black text-zinc-900 text-lg">My Conferences</h4>
-                                            <p className="text-xs font-bold text-zinc-400">Your upcoming events</p>
-                                        </div>
-                                        <button onClick={() => setActiveTab('registrations')} className="p-2 bg-zinc-50 hover:bg-zinc-100 rounded-xl transition-all">
-                                            <ChevronRight className="w-5 h-5 text-zinc-400" />
-                                        </button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        {userData?.registrations?.length > 0 ? (
-                                            userData.registrations.slice(0, 3).map((reg) => (
-                                                <div key={reg._id} className="flex items-center gap-4 p-4 rounded-3xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:shadow-lg hover:shadow-zinc-200/50 transition-all duration-300">
-                                                    <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-blue-600 shadow-sm">
-                                                        <Calendar className="w-6 h-6" />
-                                                    </div>
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="font-black text-zinc-900 truncate text-sm">{reg.conference.title}</p>
-                                                        <p className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
-                                                            <MapPin className="w-3 h-3" /> {reg.conference.location}
-                                                        </p>
-                                                    </div>
-                                                    <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border border-emerald-100/50">
-                                                        {reg.status}
-                                                    </span>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="text-center py-10 opacity-40">
-                                                <Calendar className="w-12 h-12 mx-auto mb-2" />
-                                                <p className="text-sm font-bold">Not registered yet</p>
+                                {/* Only show My Conferences for regular users (not Chair/Reviewer) */}
+                                {currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' && (
+                                    <div className="bg-white rounded-[1.5rem] border border-zinc-200 p-6 shadow-sm">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <h4 className="font-black text-zinc-900 text-lg">My Conferences</h4>
+                                                <p className="text-xs font-bold text-zinc-400">Your upcoming events</p>
                                             </div>
-                                        )}
+                                            <button onClick={() => setActiveTab('registrations')} className="p-2 bg-zinc-50 hover:bg-zinc-100 rounded-xl transition-all">
+                                                <ChevronRight className="w-5 h-5 text-zinc-400" />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {userData?.registrations?.length > 0 ? (
+                                                userData.registrations.slice(0, 3).map((reg) => (
+                                                    <div key={reg._id} className="flex items-center gap-4 p-4 rounded-3xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:shadow-lg hover:shadow-zinc-200/50 transition-all duration-300">
+                                                        <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-blue-600 shadow-sm">
+                                                            <Calendar className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="flex-1 overflow-hidden">
+                                                            <p className="font-black text-zinc-900 truncate text-sm">{reg.conference.title}</p>
+                                                            <p className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
+                                                                <MapPin className="w-3 h-3" /> {reg.conference.location}
+                                                            </p>
+                                                        </div>
+                                                        <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border border-emerald-100/50">
+                                                            {reg.status}
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center py-10 opacity-40">
+                                                    <Calendar className="w-12 h-12 mx-auto mb-2" />
+                                                    <p className="text-sm font-bold">Not registered yet</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
-                                <div className="bg-white rounded-[1.5rem] border border-zinc-200 p-6 shadow-sm">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h4 className="font-black text-zinc-900 text-lg">My Submissions</h4>
-                                            <p className="text-xs font-bold text-zinc-400">Track your research papers</p>
-                                        </div>
-                                        <button onClick={() => setActiveTab('submissions')} className="p-2 bg-zinc-50 hover:bg-zinc-100 rounded-xl transition-all">
-                                            <ChevronRight className="w-5 h-5 text-zinc-400" />
-                                        </button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        {userData?.submissions?.length > 0 ? (
-                                            userData.submissions.slice(0, 3).map((sub) => (
-                                                <div key={sub._id} className="flex items-center gap-4 p-4 rounded-3xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:shadow-lg hover:shadow-zinc-200/50 transition-all duration-300">
-                                                    <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-indigo-600 shadow-sm">
-                                                        <FileText className="w-6 h-6" />
-                                                    </div>
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="font-black text-zinc-900 truncate text-sm">{sub.title}</p>
-                                                        <p className="text-[10px] font-bold text-zinc-400">{sub.conference.title}</p>
-                                                    </div>
-                                                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border ${
-                                                        sub.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' :
-                                                        sub.status === 'Rejected' ? 'bg-red-50 text-red-600 border-red-100/50' :
-                                                        'bg-blue-50 text-blue-600 border-blue-100/50'
-                                                    }`}>
-                                                        {sub.status}
-                                                    </span>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="text-center py-10 opacity-40">
-                                                <FileText className="w-12 h-12 mx-auto mb-2" />
-                                                <p className="text-sm font-bold">No submissions yet</p>
+
+                                {/* Only show My Submissions for regular users (not Chair/Reviewer) */}
+                                {currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' && (
+                                    <div className="bg-white rounded-[1.5rem] border border-zinc-200 p-6 shadow-sm">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <h4 className="font-black text-zinc-900 text-lg">My Submissions</h4>
+                                                <p className="text-xs font-bold text-zinc-400">Track your research papers</p>
                                             </div>
-                                        )}
+                                            <button onClick={() => setActiveTab('submissions')} className="p-2 bg-zinc-50 hover:bg-zinc-100 rounded-xl transition-all">
+                                                <ChevronRight className="w-5 h-5 text-zinc-400" />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {userData?.submissions?.length > 0 ? (
+                                                userData.submissions.slice(0, 3).map((sub) => (
+                                                    <div key={sub._id} className="flex items-center gap-4 p-4 rounded-3xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:shadow-lg hover:shadow-zinc-200/50 transition-all duration-300">
+                                                        <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-indigo-600 shadow-sm">
+                                                            <FileText className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="flex-1 overflow-hidden">
+                                                            <p className="font-black text-zinc-900 truncate text-sm">{sub.title}</p>
+                                                            <p className="text-[10px] font-bold text-zinc-400">{sub.conference.title}</p>
+                                                        </div>
+                                                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border ${
+                                                            sub.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' :
+                                                            sub.status === 'Rejected' ? 'bg-red-50 text-red-600 border-red-100/50' :
+                                                            'bg-blue-50 text-blue-600 border-blue-100/50'
+                                                        }`}>
+                                                            {sub.status}
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center py-10 opacity-40">
+                                                    <FileText className="w-12 h-12 mx-auto mb-2" />
+                                                    <p className="text-sm font-bold">No submissions yet</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     )}

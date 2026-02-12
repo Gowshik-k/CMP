@@ -7,7 +7,8 @@ const responses = require('../utils/responses');
 // Get conferences managed by the current chair with real stats
 exports.getManagedConferences = async (req, res, next) => {
     try {
-        const conferences = await Conference.find({ createdBy: req.user._id })
+        // Chairs can access ALL conferences (not just their own)
+        const conferences = await Conference.find({})
             .sort({ startDate: 1 });
 
         // Enhance each conference with real counts
@@ -55,10 +56,7 @@ exports.assignReviewer = async (req, res, next) => {
         const submission = await Submission.findById(submissionId).populate('conference');
         if (!submission) return responses.notFound(res, 'Submission not found');
 
-        // Verify chair ownership
-        if (submission.conference.createdBy.toString() !== req.user._id.toString()) {
-            return responses.forbidden(res, 'Access denied: You do not manage this conference');
-        }
+        // Chairs can assign reviewers to ANY conference
 
         // Check if already assigned
         const existingReview = await Review.findOne({ submission: submissionId, reviewer: reviewerId });
@@ -84,14 +82,11 @@ exports.getConferenceSubmissions = async (req, res, next) => {
     try {
         const { conferenceId } = req.params;
 
-        // Verify the chair owns this conference
-        const conference = await Conference.findOne({
-            _id: conferenceId,
-            createdBy: req.user._id
-        });
+        // Chairs can access submissions for ANY conference
+        const conference = await Conference.findById(conferenceId);
 
         if (!conference) {
-            return responses.forbidden(res, 'Access denied: You do not manage this conference');
+            return responses.notFound(res, 'Conference not found');
         }
 
         const submissions = await Submission.find({ conference: conferenceId })
@@ -115,16 +110,14 @@ exports.updateSubmissionStatus = async (req, res, next) => {
             return responses.badRequest(res, 'Invalid status');
         }
 
-        // Find submission and populate conference to check ownership
+        // Find submission and populate conference
         const submission = await Submission.findById(id).populate('conference');
 
         if (!submission) {
             return responses.notFound(res, 'Submission not found');
         }
 
-        if (submission.conference.createdBy.toString() !== req.user._id.toString()) {
-            return responses.forbidden(res, 'Access denied: You do not manage this conference');
-        }
+        // Chairs can update statuses for ANY conference
 
         submission.status = status;
         await submission.save();
