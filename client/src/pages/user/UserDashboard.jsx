@@ -102,9 +102,9 @@ const UserDashboard = ({ user, setUser }) => {
         window.location.href = '/login';
     };
 
-    const handleRegister = async (conferenceId) => {
+    const handleRegister = async (conferenceId, intendToSubmit) => {
         try {
-            await participantAPI.register(conferenceId);
+            await participantAPI.register(conferenceId, intendToSubmit);
             setShowRegModal(false);
             setRefreshKey(prev => prev + 1);
             alert('Successfully registered!');
@@ -196,6 +196,10 @@ const UserDashboard = ({ user, setUser }) => {
         ...(currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' ? [
             { id: 'conferences', name: 'Conferences', icon: Calendar },
             { id: 'registrations', name: 'My Registrations', icon: ClipboardList },
+        ] : []),
+
+        // Only show Submissions for regular users (not Chair/Reviewer) AND if they have submissions
+        ...(currentUser?.role !== 'Chair' && currentUser?.role !== 'Reviewer' && userData?.submissions?.length > 0 ? [
             { id: 'submissions', name: 'My Submissions', icon: FileText },
         ] : []),
         // Role-specific tabs

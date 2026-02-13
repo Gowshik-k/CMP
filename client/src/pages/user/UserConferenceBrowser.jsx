@@ -122,13 +122,15 @@ const UserConferenceBrowser = ({ onRegister, onSubmitPaper }) => {
                                     Registered
                                 </button>
                             )}
-                            <button 
-                                onClick={() => onSubmitPaper(conf)}
-                                className="flex-1 px-4 py-2.5 bg-white border border-zinc-200 text-zinc-700 rounded-xl font-bold text-sm hover:border-zinc-900 hover:text-zinc-900 transition-all flex items-center justify-center gap-2"
-                            >
-                                <FileText className="w-4 h-4" />
-                                Submit Paper
-                            </button>
+                            {conf.isRegistered && conf.intendToSubmit && (
+                                <button 
+                                    onClick={() => onSubmitPaper(conf)}
+                                    className="flex-1 px-4 py-2.5 bg-white border border-zinc-200 text-zinc-700 rounded-xl font-bold text-sm hover:border-zinc-900 hover:text-zinc-900 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <FileText className="w-4 h-4" />
+                                    Submit Paper
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

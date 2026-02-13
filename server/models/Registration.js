@@ -19,6 +19,10 @@ const registrationSchema = new mongoose.Schema({
     registrationDate: {
         type: Date,
         default: Date.now
+    },
+    intendToSubmit: {
+        type: Boolean,
+        default: false
     }
 });
 

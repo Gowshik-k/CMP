@@ -6,7 +6,7 @@ const User = require('../models/User');
 // Register for a conference
 exports.registerForConference = async (req, res) => {
     try {
-        const { conferenceId } = req.body;
+        const { conferenceId, intendToSubmit } = req.body;
         const userId = req.user._id;
 
         // Check if conference exists
@@ -23,7 +23,8 @@ exports.registerForConference = async (req, res) => {
 
         const registration = new Registration({
             user: userId,
-            conference: conferenceId
+            conference: conferenceId,
+            intendToSubmit: intendToSubmit || false
         });
 
         await registration.save();
@@ -63,6 +64,13 @@ exports.submitPaper = async (req, res) => {
         });
 
         await submission.save();
+
+        // Check and update user role if it's their first submission
+        const user = await User.findById(userId);
+        if (user && user.role === 'Attendee') {
+            user.role = 'Author';
+            await user.save();
+        }
 
         res.status(201).json({
             success: true,
@@ -117,11 +125,21 @@ exports.getAllConferences = async (req, res) => {
 
         // Add registration status to each conference
         const userRegistrations = await Registration.find({ user: userId });
-        const registeredConfIds = userRegistrations.map(r => r.conference.toString());
+
+        // Create a map for easier lookup: conferenceId -> registrationObj
+        const registrationMap = {};
+        userRegistrations.forEach(reg => {
+            registrationMap[reg.conference.toString()] = reg;
+        });
 
         const conferencesWithStatus = conferences.map(conf => {
             const confObj = conf.toObject();
-            confObj.isRegistered = registeredConfIds.includes(conf._id.toString());
+            const registration = registrationMap[conf._id.toString()];
+
+            confObj.isRegistered = !!registration;
+            if (registration) {
+                confObj.intendToSubmit = registration.intendToSubmit;
+            }
             return confObj;
         });
 

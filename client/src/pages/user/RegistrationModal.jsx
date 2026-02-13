@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Calendar, CheckCircle, Info, X } from 'lucide-react';
 
 const RegistrationModal = ({ isOpen, onClose, onConfirm, conference }) => {
+    const [intendToSubmit, setIntendToSubmit] = useState(false);
+
     if (!isOpen || !conference) return null;
 
     return (
@@ -27,6 +30,19 @@ const RegistrationModal = ({ isOpen, onClose, onConfirm, conference }) => {
                                 </p>
                             </div>
                         </div>
+                        
+                        <div className="flex items-center gap-3 pt-3 border-t border-zinc-200">
+                            <input 
+                                type="checkbox" 
+                                id="intendToSubmit"
+                                checked={intendToSubmit}
+                                onChange={(e) => setIntendToSubmit(e.target.checked)}
+                                className="w-5 h-5 rounded-md border-zinc-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            />
+                            <label htmlFor="intendToSubmit" className="text-sm text-zinc-600 font-medium cursor-pointer select-none">
+                                I plan to submit a paper
+                            </label>
+                        </div>
                     </div>
 
                     <div className="flex gap-3">
@@ -37,7 +53,7 @@ const RegistrationModal = ({ isOpen, onClose, onConfirm, conference }) => {
                             Cancel
                         </button>
                         <button 
-                            onClick={() => onConfirm(conference._id)}
+                            onClick={() => onConfirm(conference._id, intendToSubmit)}
                             className="flex-1 px-6 py-4 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                             <CheckCircle className="w-5 h-5" />

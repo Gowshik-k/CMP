@@ -93,8 +93,8 @@ export const participantAPI = {
     getConferences: () =>
         apiClient.get('/participant/conferences'),
 
-    register: (conferenceId) =>
-        apiClient.post('/participant/register', { conferenceId }),
+    register: (conferenceId, intendToSubmit) =>
+        apiClient.post('/participant/register', { conferenceId, intendToSubmit }),
 
     submitPaper: (data) =>
         apiClient.post('/participant/submit', data),
