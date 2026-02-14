@@ -75,7 +75,7 @@ const Login = ({ setUser }) => {
             <div className="group">
               <div className="flex justify-between items-center mb-1">
                 <label className="block text-sm font-medium text-zinc-700">Password</label>
-                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">Forgot Password?</a>
+                <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">Forgot Password?</Link>
               </div>
               <input
                 type="password"

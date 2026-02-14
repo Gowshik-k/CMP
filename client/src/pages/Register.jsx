@@ -11,80 +11,66 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
   // Verification States
-  const [userId, setUserId] = useState(null);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [emailCode, setEmailCode] = useState('');
-  const [phoneCode, setPhoneCode] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Auto-redirect to login when both verified
+  // Auto-redirect to login when verified
   useEffect(() => {
-    if (isEmailVerified && isPhoneVerified) {
+    if (isEmailVerified) {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2500);
     }
-  }, [isEmailVerified, isPhoneVerified, navigate]);
+  }, [isEmailVerified, navigate]);
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/register`, { 
-        username, email, password, phoneNumber 
+        username, email, password 
       });
       
-      setUserId(res.data.userId);
+      // Response now returns email for verification context, not userId
       setStep('verify');
       
-      if (res.data.debug_phone_code) {
-        console.log('Phone code for testing:', res.data.debug_phone_code);
-        alert(`Mobile Verification Code (Simulated): ${res.data.debug_phone_code}\n\nCheck terminal for Email code if credentials are not set.`);
-      }
     } catch (err) {
       setError(err.response?.data || 'An error occurred');
     }
   };
 
-  const handleVerify = async (code, type) => {
+  const handleVerify = async (code) => {
     setError('');
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/verify`, { 
-        userId, 
-        emailCode: type === 'email' ? code : null,
-        phoneCode: type === 'phone' ? code : null
+        email, 
+        emailCode: code
       });
       
-      if (type === 'email') setIsEmailVerified(res.data.isEmailVerified);
-      if (type === 'phone') setIsPhoneVerified(res.data.isPhoneVerified);
-      
-      if (type === 'email') setEmailCode('');
-      if (type === 'phone') setPhoneCode('');
+      setIsEmailVerified(res.data.isEmailVerified);
+      setEmailCode('');
     } catch (err) {
-      setError(err.response?.data || `Invalid ${type} code.`);
-      // Clear code on error so user can re-type correctly if they want
-      if (type === 'email') setEmailCode('');
-      if (type === 'phone') setPhoneCode('');
+      setError(err.response?.data || `Invalid code.`);
+      setEmailCode('');
     }
   };
 
   // Auto-verify Email Code
   useEffect(() => {
     if (emailCode.length === 6 && !isEmailVerified) {
-      handleVerify(emailCode, 'email');
+      handleVerify(emailCode);
     }
   }, [emailCode, isEmailVerified]);
-
-  // Auto-verify Phone Code
-  useEffect(() => {
-    if (phoneCode.length === 6 && !isPhoneVerified) {
-      handleVerify(phoneCode, 'phone');
-    }
-  }, [phoneCode, isPhoneVerified]);
 
   return (
     <div className="flex h-[calc(100vh-64px)] w-full bg-white overflow-hidden">
@@ -130,12 +116,12 @@ const Register = () => {
                     <input type="email" className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="name@university.edu" />
                   </div>
                   <div className="group">
-                    <label className="block text-sm font-medium text-zinc-700 mb-1">Phone Number</label>
-                    <input type="tel" className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required placeholder="+1 234 567 890" />
-                  </div>
-                  <div className="group">
                     <label className="block text-sm font-medium text-zinc-700 mb-1">Password</label>
                     <input type="password" className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={password} onChange={(e) => setPassword(e.target.value)} required minLength="6" placeholder="••••••••" />
+                  </div>
+                  <div className="group">
+                    <label className="block text-sm font-medium text-zinc-700 mb-1">Confirm Password</label>
+                    <input type="password" className="block w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength="6" placeholder="••••••••" />
                   </div>
                 </div>
                 <div className="pt-2"><button type="submit" className="w-full py-3.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all uppercase tracking-wider">Sign Up</button></div>
@@ -146,7 +132,7 @@ const Register = () => {
             <div className="space-y-6 animate-fade-in">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-zinc-900">Verify Your Identity</h3>
-                <p className="text-zinc-500 text-sm mt-1">Check your email and mobile for the codes.</p>
+                <p className="text-zinc-500 text-sm mt-1">Check your email for the verification code.</p>
               </div>
 
               {success ? (
@@ -186,33 +172,8 @@ const Register = () => {
                       )}
                     </div>
 
-                    <div className="border-t border-zinc-200"></div>
-
-                    {/* PHONE PART */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Phone className={`w-4 h-4 ${isPhoneVerified ? 'text-emerald-500' : 'text-zinc-400'}`} />
-                          <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">Mobile Code</span>
-                        </div>
-                        {isPhoneVerified && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Verified</span>}
-                      </div>
-
-                      {!isPhoneVerified && (
-                        <div className="space-y-2">
-                          <input 
-                            type="text" 
-                            maxLength="6" 
-                            className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-2xl font-bold text-center tracking-[0.5em] outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:tracking-normal placeholder:text-sm" 
-                            placeholder="Type 6-digit code" 
-                            value={phoneCode} 
-                            onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, ''))} 
-                          />
-                          <p className="text-[10px] text-zinc-400 text-center uppercase tracking-widest">Automatic verification on 6th digit</p>
-                        </div>
-                      )}
                     </div>
-                  </div>
+
 
                   <div className="text-center pt-2">
                     <button type="button" onClick={() => setStep('register')} className="text-xs text-zinc-400 hover:text-zinc-600 font-medium">Wrong details? Back to registration</button>

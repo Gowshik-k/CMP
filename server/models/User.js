@@ -26,23 +26,12 @@ const userSchema = new mongoose.Schema({
         enum: ['Attendee', 'Author', 'Reviewer', 'Chair', 'Admin'],
         default: 'Attendee'
     },
-    phoneNumber: {
-        type: String,
-        required: true
-    },
+
     isEmailVerified: {
         type: Boolean,
         default: false
     },
-    isPhoneVerified: {
-        type: Boolean,
-        default: false
-    },
     emailCode: {
-        type: String,
-        default: ''
-    },
-    phoneCode: {
         type: String,
         default: ''
     },
@@ -70,6 +59,11 @@ userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
 
     try {
+        // If password is already hashed (imported from PendingUser), skip hashing
+        if (this.password.startsWith('$2')) {
+            return next();
+        }
+
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
         next();

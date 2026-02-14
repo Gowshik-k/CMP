@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const errorHandler = require('./middleware/errorHandler');
+const helmet = require('helmet');
+const compression = require('compression');
 
 dotenv.config();
 
@@ -15,8 +17,11 @@ const userRoutes = require('./routes/userRoutes');
 const chairRoutes = require('./routes/chairRoutes');
 const reviewerRoutes = require('./routes/reviewerRoutes');
 
+app.use(helmet());
+app.use(compression());
 app.use(cors());
 app.use(express.json());
+app.set('trust proxy', 1); // Trust first proxy (Render load balancer)
 
 // Route Middlewares
 app.use('/api/user', authRoutes);
@@ -44,6 +49,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Global error handler (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Server is running on http://127.0.0.1:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 });

@@ -8,6 +8,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserDashboard from './pages/user/UserDashboard';
 import Navbar from './components/Navbar';
 import Verify from './pages/Verify';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<Verify />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
