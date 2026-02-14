@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Phone, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Mail, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { authAPI } from '../api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -37,9 +37,7 @@ const Register = () => {
     }
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/register`, { 
-        username, email, password 
-      });
+      await authAPI.register(username, email, password);
       
       // Response now returns email for verification context, not userId
       setStep('verify');
@@ -52,10 +50,7 @@ const Register = () => {
   const handleVerify = async (code) => {
     setError('');
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/verify`, { 
-        email, 
-        emailCode: code
-      });
+      const res = await authAPI.verify(email, code);
       
       setIsEmailVerified(res.data.isEmailVerified);
       setEmailCode('');

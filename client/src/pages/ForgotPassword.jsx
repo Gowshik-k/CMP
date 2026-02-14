@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Mail, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
+import { authAPI } from '../api';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/user/forgot-password`, { email });
+            await authAPI.forgotPassword(email);
             setMessage('Reset code sent to your email.');
             setStep(2);
         } catch (err) {
@@ -45,11 +45,7 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/user/reset-password`, {
-                email,
-                emailCode: resetCode,
-                newPassword
-            });
+            await authAPI.resetPassword(email, resetCode, newPassword);
             setMessage('Password reset successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {

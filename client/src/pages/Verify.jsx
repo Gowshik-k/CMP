@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, MessageSquare, Mail, Phone, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Mail, CheckCircle2 } from 'lucide-react';
+import { authAPI } from '../api';
 
 const Verify = () => {
     const navigate = useNavigate();
@@ -11,40 +11,29 @@ const Verify = () => {
     const [userId] = useState(location.state?.userId);
     const [email] = useState(location.state?.email);
     const [isEmailVerified, setIsEmailVerified] = useState(location.state?.isEmailVerified || false);
-    const [isPhoneVerified, setIsPhoneVerified] = useState(location.state?.isPhoneVerified || false);
 
     const [emailCode, setEmailCode] = useState('');
-    const [phoneCode, setPhoneCode] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
     // Redirect to login if both are done
     useEffect(() => {
-        if (isEmailVerified && isPhoneVerified) {
+        if (isEmailVerified) {
             setSuccess(true);
             setTimeout(() => navigate('/login'), 2500);
         }
-    }, [isEmailVerified, isPhoneVerified, navigate]);
+    }, [isEmailVerified, navigate]);
 
     const handleVerify = async (e, type) => {
         e.preventDefault();
         setError('');
         
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/verify`, { 
-                userId, 
-                emailCode: type === 'email' ? emailCode : null,
-                phoneCode: type === 'phone' ? phoneCode : null
-            });
-            
-            if (type === 'email') setIsEmailVerified(res.data.isEmailVerified);
-            if (type === 'phone') setIsPhoneVerified(res.data.isPhoneVerified);
-            
-            // Clear inputs
+            const res = await authAPI.verify(email, emailCode);
+            setIsEmailVerified(res.data.isEmailVerified);
             setEmailCode('');
-            setPhoneCode('');
         } catch (err) {
-            setError(err.response?.data || `Invalid ${type} code.`);
+            setError(err.response?.data || `Invalid code.`);
         }
     };
 
@@ -112,37 +101,6 @@ const Verify = () => {
                                         />
                                         <button className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
                                             <span>Verify Email</span>
-                                            <ArrowRight className="w-4 h-4" />
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-
-                            {/* PHONE STEP */}
-                            <div className={`p-6 rounded-3xl border-2 transition-all ${isPhoneVerified ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-zinc-100'}`}>
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className={`p-3 rounded-xl ${isPhoneVerified ? 'bg-emerald-500 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
-                                        <Phone className="w-5 h-5" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-zinc-900">Mobile Verification</h4>
-                                        <p className="text-xs text-zinc-500">Sent to your registered phone</p>
-                                    </div>
-                                    {isPhoneVerified && <CheckCircle2 className="text-emerald-500 w-6 h-6" />}
-                                </div>
-
-                                {!isPhoneVerified && (
-                                    <form onSubmit={(e) => handleVerify(e, 'phone')} className="space-y-3">
-                                        <input 
-                                            type="text"
-                                            maxLength="6"
-                                            className="w-full px-5 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xl font-bold text-center tracking-widest focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                            placeholder="000000"
-                                            value={phoneCode}
-                                            onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, ''))}
-                                        />
-                                        <button className="w-full py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
-                                            <span>Verify Mobile</span>
                                             <ArrowRight className="w-4 h-4" />
                                         </button>
                                     </form>

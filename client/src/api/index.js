@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+let API_BASE_URL = import.meta.env.VITE_API_URL;
+if (API_BASE_URL && !API_BASE_URL.startsWith('http')) {
+    API_BASE_URL = `https://${API_BASE_URL}`;
+}
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -41,11 +44,17 @@ export const authAPI = {
     login: (email, password) =>
         apiClient.post('/user/login', { email, password }),
 
-    register: (username, email, password, phoneNumber) =>
-        apiClient.post('/user/register', { username, email, password, phoneNumber }),
+    register: (username, email, password) =>
+        apiClient.post('/user/register', { username, email, password }),
 
-    verify: (userId, emailCode, phoneCode) =>
-        apiClient.post('/user/verify', { userId, emailCode, phoneCode })
+    verify: (email, emailCode) =>
+        apiClient.post('/user/verify', { email, emailCode }),
+
+    forgotPassword: (email) =>
+        apiClient.post('/user/forgot-password', { email }),
+
+    resetPassword: (email, emailCode, newPassword) =>
+        apiClient.post('/user/reset-password', { email, emailCode, newPassword })
 };
 
 // Admin API
