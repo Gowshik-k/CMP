@@ -2,6 +2,7 @@ services:
   - type: web
     name: cmp-server
     env: node
+    plan: free
     rootDir: server
     buildCommand: npm install
     startCommand: npm start
@@ -19,9 +20,8 @@ services:
       - key: EMAIL_PASS
         sync: false
 
-  - type: web
-    name: cmp-client
-    env: static
+staticSites:
+  - name: cmp-client
     rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
