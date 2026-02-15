@@ -398,15 +398,15 @@ const UserDashboard = ({ user, setUser }) => {
                                         </div>
                                         <div className="space-y-4">
                                             {userData?.registrations?.length > 0 ? (
-                                                userData.registrations.slice(0, 3).map((reg) => (
+                                                userData.registrations.filter(reg => reg.conference).slice(0, 3).map((reg) => (
                                                     <div key={reg._id} className="flex items-center gap-4 p-4 rounded-3xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:shadow-lg hover:shadow-zinc-200/50 transition-all duration-300">
                                                         <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-blue-600 shadow-sm">
                                                             <Calendar className="w-6 h-6" />
                                                         </div>
                                                         <div className="flex-1 overflow-hidden">
-                                                            <p className="font-black text-zinc-900 truncate text-sm">{reg.conference.title}</p>
+                                                            <p className="font-black text-zinc-900 truncate text-sm">{reg.conference?.title}</p>
                                                             <p className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
-                                                                <MapPin className="w-3 h-3" /> {reg.conference.location}
+                                                                <MapPin className="w-3 h-3" /> {reg.conference?.location}
                                                             </p>
                                                         </div>
                                                         <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border border-emerald-100/50">
@@ -439,14 +439,14 @@ const UserDashboard = ({ user, setUser }) => {
                                         </div>
                                         <div className="space-y-4">
                                             {userData?.submissions?.length > 0 ? (
-                                                userData.submissions.slice(0, 3).map((sub) => (
+                                                userData.submissions.filter(sub => sub.conference).slice(0, 3).map((sub) => (
                                                     <div key={sub._id} className="flex items-center gap-4 p-4 rounded-3xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:shadow-lg hover:shadow-zinc-200/50 transition-all duration-300">
                                                         <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-indigo-600 shadow-sm">
                                                             <FileText className="w-6 h-6" />
                                                         </div>
                                                         <div className="flex-1 overflow-hidden">
                                                             <p className="font-black text-zinc-900 truncate text-sm">{sub.title}</p>
-                                                            <p className="text-[10px] font-bold text-zinc-400">{sub.conference.title}</p>
+                                                            <p className="text-[10px] font-bold text-zinc-400">{sub.conference?.title}</p>
                                                         </div>
                                                         <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border ${
                                                             sub.status === 'Accepted' ? 'bg-emerald-50 text-emerald-600 border-emerald-100/50' :
@@ -498,20 +498,20 @@ const UserDashboard = ({ user, setUser }) => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-zinc-50">
-                                        {userData?.registrations?.map((reg) => (
+                                        {userData?.registrations?.filter(reg => reg.conference).map((reg) => (
                                             <tr key={reg._id} className="hover:bg-zinc-50/50 transition-colors group">
                                                 <td className="px-8 py-6">
-                                                    <p className="font-black text-zinc-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{reg.conference.title}</p>
+                                                    <p className="font-black text-zinc-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{reg.conference?.title}</p>
                                                     <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">Registration Code: {reg._id.slice(-8).toUpperCase()}</p>
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-2 text-sm font-bold text-zinc-600">
                                                         <MapPin className="w-4 h-4 text-zinc-300" />
-                                                        {reg.conference.location}
+                                                        {reg.conference?.location}
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-6 text-sm font-bold text-zinc-600">
-                                                    {formatDate(reg.conference.startDate)}
+                                                    {formatDate(reg.conference?.startDate)}
                                                 </td>
                                                 <td className="px-8 py-6 text-right">
                                                     <span className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-[2rem] text-[10px] font-black uppercase tracking-widest border border-emerald-100/50">
@@ -536,7 +536,7 @@ const UserDashboard = ({ user, setUser }) => {
 
                     {activeTab === 'submissions' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up">
-                            {userData?.submissions?.map((sub) => (
+                            {userData?.submissions?.filter(sub => sub.conference).map((sub) => (
                                 <div key={sub._id} className="bg-white p-8 rounded-[3rem] border border-zinc-200 shadow-sm flex flex-col group hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300">
                                     <div className="flex justify-between items-start mb-6">
                                         <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm border ${
@@ -552,7 +552,7 @@ const UserDashboard = ({ user, setUser }) => {
                                         </div>
                                     </div>
                                     <h5 className="text-xl font-black text-zinc-900 mb-2 leading-tight uppercase group-hover:text-indigo-600 transition-colors">{sub.title}</h5>
-                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-6 pb-6 border-b border-zinc-50">Conference: {sub.conference.title}</p>
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-6 pb-6 border-b border-zinc-50">Conference: {sub.conference?.title}</p>
                                     <p className="text-sm text-zinc-500 line-clamp-3 mb-8 flex-1 italic leading-relaxed font-bold">"{sub.abstract}"</p>
                                     <div className="flex justify-between items-center bg-zinc-50 -mx-8 -mb-8 p-6 rounded-b-[3rem] mt-4 border-t border-zinc-100">
                                         <button className="text-xs font-black text-indigo-600 flex items-center gap-2 hover:scale-105 transition-transform">
